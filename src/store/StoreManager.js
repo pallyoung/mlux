@@ -1,10 +1,15 @@
 'use strict'
 import EventEmitter from './../EventEmitter';
 import Store from './Store';
+import emptyMethod from './../emptyMethod';
 var STORE_VAN = {}
 class StoreManager extends EventEmitter{
     constructor(){
         super();
+        this.commitTool = {
+            setter:emptyMethod,
+            getter:emptyMethod
+        }
     }
     setCommitTool(tool){
         /**
@@ -30,6 +35,12 @@ class StoreManager extends EventEmitter{
     }
     setStore(){
 
+    }
+    commit(name,value){
+      return this.commitTool.setter(name,value);
+    }
+    fetch(name){
+        return this.commitTool.getter(name);
     }
     piple(data,pipleArr){
 
