@@ -8,8 +8,8 @@ export default class Dispatcher {
         this._isHandled = {};
         this._isPending = {};
     }
-    dispatch() {
-
+    dispatch(payload) {
+        
     }
     register(callback) {
         var token = PREFIX + id++;
