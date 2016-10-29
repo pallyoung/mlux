@@ -2,50 +2,65 @@
 import EventEmitter from './../EventEmitter';
 import Store from './Store';
 import emptyMethod from './../emptyMethod';
-var STORE_VAN = {}
+var _storeVan = {}
 class StoreManager extends EventEmitter{
     constructor(){
         super();
-        this.commitTool = {
+        this.storageTool = {
             setter:emptyMethod,
             getter:emptyMethod
         }
+        this._fetch = emptyMethod;
     }
-    setCommitTool(tool){
+    isConnected(){
+        return true;
+    }
+    setFetchTool(tool){
+        this._fetch = tool;
+    }
+    setStorageTool(tool){
         /**
-         * setter(name,value)
-         * getter(name)
+         * setter(name,value) return promise
+         * getter(name) return promise
          */
-        this.commitTool = tool;
+        this.storageTool = tool;
     }
     loadConfig(configArr){
         for(let i = 0;i<configArr.length;i++){
             let config = configArr[i];
-            STORE_VAN[config.name] = new Store(configArr,this);
+            _storeVan[config.name] = new Store(config,this);
         }
     }
-    register(){
-
+    register(config){
+        _storeVan[config.name] = new Store(config,this);
     }
-    unregister(){
-
+    unregister(name){
+        var store = _storeVan[name];
+        //移除所有监听事件
+        store.removeAllListeners();
+        delete _storeVan[name];
     }
-    getStore(){
-
+    getter(name,...args){
+        return _storeVan[name].getter(...args);
     }
-    setStore(){
-
+    setter(name,data){
+        return _storeVan[name].setter(data);
     }
-    commit(name,value){
-      return this.commitTool.setter(name,value);
+    syncStorage(name,value){
+        if(value){
+            return this.storageTool.setter(name,value);
+        }else{
+            return this.storageTool.getter(name);
+        }    
     }
-    fetch(name){
-        return this.commitTool.getter(name);
+    fetch(remote,...args){
+        return this.remoteTool.fetch(remote,...args);
     }
-    piple(data,pipleArr){
-
+    piple(storeName,data){
+        var store = _storeVan[storeName];
+        store.setter(data);
     }
     
 }
 
-export default new StoreManager();
+export default StoreManager;
