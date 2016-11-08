@@ -3,6 +3,7 @@ import EventEmitter from './../EventEmitter';
 import Store from './Store';
 import emptyMethod from './../emptyMethod';
 var _storeVan = {}
+//todo:脏值检测
 class StoreManager extends EventEmitter{
     constructor(){
         super();
@@ -24,6 +25,11 @@ class StoreManager extends EventEmitter{
             this.register(config)
         }
     }
+    notifyChange(storeName){
+        var store = _storeVan[storeName];
+        store.notifyChange();
+        this.emit('change',storeName);
+    }
     register(config){
         var store = new Store(config,this);
         _storeVan[config.name] = store;
@@ -36,7 +42,7 @@ class StoreManager extends EventEmitter{
                 store.notifyChange();
                 this.emit('change',config.name);
             }
-        })
+        });
         // this['get'+config.name.slice(0,1).toUpperCase()+config.name.slice(1)] = function(...args){
         //     return _storeVan[name].getter(...args);
         // }
