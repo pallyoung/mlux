@@ -10,13 +10,6 @@ class StoreManager extends EventEmitter{
             setter:emptyMethod,
             getter:emptyMethod
         }
-        this._fetch = emptyMethod;
-    }
-    isConnected(){
-        return true;
-    }
-    setFetchTool(tool){
-        this._fetch = tool;
     }
     setStorageTool(tool){
         /**
@@ -25,27 +18,43 @@ class StoreManager extends EventEmitter{
          */
         this.storageTool = tool;
     }
-    loadConfig(configArr){
+    mapRegister(configArr){
         for(let i = 0;i<configArr.length;i++){
             let config = configArr[i];
-            _storeVan[config.name] = new Store(config,this);
+            this.register(config)
         }
     }
     register(config){
-        _storeVan[config.name] = new Store(config,this);
+        var store = new Store(config,this);
+        _storeVan[config.name] = store;
+        Object.defineProperty(this,config.name,{
+            get:()=>{
+                return store.getter();
+            },
+            set:(value)=>{
+                store.setter(value);
+                store.notifyChange();
+                this.emit('change',config.name);
+            }
+        })
+        // this['get'+config.name.slice(0,1).toUpperCase()+config.name.slice(1)] = function(...args){
+        //     return _storeVan[name].getter(...args);
+        // }
     }
     unregister(name){
         var store = _storeVan[name];
         //移除所有监听事件
         store.removeAllListeners();
         delete _storeVan[name];
+        delete this[name];
+        //delete this['get'+name.slice(0,1).toUpperCase()+name.slice(1)];
     }
-    getter(name,...args){
-        return _storeVan[name].getter(...args);
-    }
-    setter(name,data){
-        return _storeVan[name].setter(data);
-    }
+    // getter(name,...args){
+    //     return _storeVan[name].getter(...args);
+    // }
+    // setter(name,data){
+    //     return _storeVan[name].setter(data);
+    // }
     syncStorage(name,value){
         if(value){
             return this.storageTool.setter(name,value);
@@ -53,12 +62,16 @@ class StoreManager extends EventEmitter{
             return this.storageTool.getter(name);
         }    
     }
-    fetch(remote,...args){
-        return this.remoteTool.fetch(remote,...args);
-    }
-    piple(storeName,data){
-        var store = _storeVan[storeName];
-        store.setter(data);
+    // fetch(remote,...args){
+    //     return this.remoteTool.fetch(remote,...args);
+    // }
+    flow(flowIn,flows,data){
+        flows.forEach((storeName)=>{
+            let store = _storeVan[storeName];
+            if(store.onFlow){
+                store.onFlow(flowIn,data);
+            }         
+        })      
     }
     
 }
