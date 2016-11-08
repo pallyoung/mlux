@@ -27,7 +27,7 @@ var storeManager = new StoreManager();
 //     storeManager.handleAction(payload.action, payload.data);
 // });
 export default {
-    Dispatcher: dispatcher,
+   // Dispatcher: dispatcher,
     ControllerManager: cm,
     StoreManager: storeManager
 }
