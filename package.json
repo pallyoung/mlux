@@ -1,45 +1,4 @@
 {
-  "_args": [
-    [
-      {
-        "raw": "mlux",
-        "scope": null,
-        "escapedName": "mlux",
-        "name": "mlux",
-        "rawSpec": "",
-        "spec": "latest",
-        "type": "tag"
-      },
-      "/Users/Spencer/workspace/IMDemo"
-    ]
-  ],
-  "_from": "mlux@latest",
-  "_id": "mlux@0.0.1",
-  "_inCache": true,
-  "_installable": true,
-  "_location": "/mlux",
-  "_nodeVersion": "6.5.0",
-  "_npmUser": {},
-  "_npmVersion": "3.10.3",
-  "_phantomChildren": {},
-  "_requested": {
-    "raw": "mlux",
-    "scope": null,
-    "escapedName": "mlux",
-    "name": "mlux",
-    "rawSpec": "",
-    "spec": "latest",
-    "type": "tag"
-  },
-  "_requiredBy": [
-    "#USER",
-    "/"
-  ],
-  "_resolved": "http://120.27.220.11:4873/mlux/-/mlux-0.0.1.tgz",
-  "_shasum": "5184ddac76a3649a2b40c630e20bc5ae4acc6145",
-  "_shrinkwrap": null,
-  "_spec": "mlux",
-  "_where": "/Users/Spencer/workspace/IMDemo",
   "author": {
     "name": "Spencer"
   },
@@ -75,5 +34,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
