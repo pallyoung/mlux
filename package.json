@@ -1,27 +1,79 @@
 {
-  "name": "mlux",
-  "version": "0.0.1",
+  "_args": [
+    [
+      {
+        "raw": "mlux",
+        "scope": null,
+        "escapedName": "mlux",
+        "name": "mlux",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "/Users/Spencer/workspace/IMDemo"
+    ]
+  ],
+  "_from": "mlux@latest",
+  "_id": "mlux@0.0.1",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/mlux",
+  "_nodeVersion": "6.5.0",
+  "_npmUser": {},
+  "_npmVersion": "3.10.3",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "mlux",
+    "scope": null,
+    "escapedName": "mlux",
+    "name": "mlux",
+    "rawSpec": "",
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "http://120.27.220.11:4873/mlux/-/mlux-0.0.1.tgz",
+  "_shasum": "5184ddac76a3649a2b40c630e20bc5ae4acc6145",
+  "_shrinkwrap": null,
+  "_spec": "mlux",
+  "_where": "/Users/Spencer/workspace/IMDemo",
+  "author": {
+    "name": "Spencer"
+  },
+  "bugs": {
+    "url": "https://github.com/pallyoung/mlux/issues"
+  },
+  "dependencies": {},
   "description": "react mvc框架",
-  "main": "index.js",
+  "devDependencies": {},
   "directories": {
     "example": "examples"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "dist": {
+    "shasum": "5184ddac76a3649a2b40c630e20bc5ae4acc6145",
+    "tarball": "http://120.27.220.11:4873/mlux/-/mlux-0.0.1.tgz"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/pallyoung/mlux.git"
-  },
+  "gitHead": "b0a7255f4e6e61a45bb97275ef26207db706319d",
+  "homepage": "https://github.com/pallyoung/mlux#readme",
   "keywords": [
     "react",
     "mvc",
     "mlux"
   ],
-  "author": "Spencer",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/pallyoung/mlux/issues"
+  "main": "src/index.js",
+  "name": "mlux",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pallyoung/mlux.git"
   },
-  "homepage": "https://github.com/pallyoung/mlux#readme"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.0.1"
 }

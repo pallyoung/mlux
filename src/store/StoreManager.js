@@ -35,7 +35,8 @@ class StoreManager extends EventEmitter{
         _storeVan[config.name] = store;
         Object.defineProperty(this,config.name,{
             get:()=>{
-                return store.getter();
+                store.getter();
+                return store.data;
             },
             set:(value)=>{
                 store.setter(value);

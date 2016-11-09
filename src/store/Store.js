@@ -12,7 +12,7 @@ const EVENT_STORAGE = 'storage';//存储
 const EVENT_GET = 'get';//获取
 const EVENT_SET = 'get';//获取
 
-class Store extends EventEmitter {
+export default class Store extends EventEmitter {
     constructor(config, storeManager) {
         super();
         this.name = config.name;
@@ -21,7 +21,7 @@ class Store extends EventEmitter {
         //更新间隔  
         //this.interval =  config.interval||-1;
         //
-        this.data = null;
+        this.data = config.data||undefined;
         this.flow = config.flow;
         this.onFlow = config.onFlow;
         //是否设置缓存，如果设置缓存 可以通过storageManager直接访问 
@@ -63,13 +63,10 @@ class Store extends EventEmitter {
      * 
      */
     async getter() {
-        var data;
         if (this.storage) {
-            data = await this.manager.syncStorage(this.name);
-        } else {
-            data = this.data;
-        }
-        return data;
+            this.data = await this.manager.syncStorage(this.name);
+        } 
+        return this.data;
     }
 }
 

@@ -1,7 +1,7 @@
 'use strict'
 import Dispatcher from './dispatcher/Dispatcher';
 import ControllerManager from './controller/ControllerManager';
-import StoreManager from './Store/StoreManager';
+import StoreManager from './store/StoreManager';
 
 
 var dispatcher = new Dispatcher();

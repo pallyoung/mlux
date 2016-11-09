@@ -39,7 +39,7 @@ class Container {
     }
 
 }
-class EventEmitter {
+export default class EventEmitter {
     constructor() {
         this._container = new Container();
         this._currentSubcription = null;
@@ -56,7 +56,7 @@ class EventEmitter {
     emit(type, ...args) {
         var listeners = this._container.getCan(type).listeners;
         for(let l in listeners){
-            listeners(...args);
+            listeners[l](...args);
         }
     }
 }
