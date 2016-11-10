@@ -3,7 +3,7 @@
 var id = 1;
 const PREFIX = 'LISTENER_';
 
-class ListenerCan {
+class Vendor {
     constructor(type) {
         this.type = type;
         this.listeners = {}
@@ -20,22 +20,29 @@ class ListenerCan {
 
 class Container {
     constructor() {
-        this._cans = {}
+        this._vendors = {}
     }
-    getCan(type) {
-        if (!this._cans[type]) {
-            this._cans[type] = new ListenerCan(type);
+    getVendor(type) {
+        if (!this._vendors[type]) {
+            this._vendors[type] = new Vendor(type);
         }
-        return this._cans[type];
+        return this._vendors[type];
     }
     addListener(type, listener) {
         return {
-            token: this.getCan(type).addListener(listener),
+            token: this.getVendor(type).addListener(listener),
             type:type
                 };
     }
     removeListener(subscription) {
-        this.getCan(subscription.type).removeListener(subscription.token);
+        this.getVendor(subscription.type).removeListener(subscription.token);
+    }
+    removeAllListeners(type){
+        if(type){
+            this._vendors[type] = undefined;
+        }else{
+            this._vendors = {}
+        }   
     }
 
 }
@@ -49,6 +56,9 @@ export default class EventEmitter {
     }
     removeListener(subscription) {
         this._container.removeListener(subscription);
+    }
+    removeAllListeners(type){
+        this._container.removeAllListeners(type)
     }
     once(type, listener) {
 
