@@ -34,13 +34,13 @@ export default class Store extends EventEmitter {
     notifyChange(){
         this.emit(EVENT_CHNAGE);
     }
-    clear(){
-        delete this.data;
-    }
-    async setter(data) {
+    // clear(){
+    //     delete this.data;
+    // }
+    setter(data) {
 
         if (this.storage) {
-            await this.manager.syncStorage(this.name, data);
+            this.manager.syncStorage(this.name, data);
         }
         this.data = data;
         //this.manager[this.name] = data;
@@ -62,10 +62,7 @@ export default class Store extends EventEmitter {
      * 
      * 
      */
-    async getter() {
-        if (this.storage) {
-            this.data = await this.manager.syncStorage(this.name);
-        } 
+    getter() {
         return this.data;
     }
 }

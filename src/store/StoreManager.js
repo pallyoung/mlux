@@ -19,10 +19,10 @@ class StoreManager extends EventEmitter{
          */
         this.storageTool = tool;
     }
-    mapRegister(configArr){
+    async mapRegister(configArr){
         for(let i = 0;i<configArr.length;i++){
             let config = configArr[i];
-            this.register(config)
+            await this.register(config)
         }
     }
     notifyChange(storeName){
@@ -44,6 +44,9 @@ class StoreManager extends EventEmitter{
                 this.emit('change',config.name);
             }
         });
+        if(config.storage){
+            return this.manager.syncStorage(this.name);
+        }
         // this['get'+config.name.slice(0,1).toUpperCase()+config.name.slice(1)] = function(...args){
         //     return _storeVan[name].getter(...args);
         // }
