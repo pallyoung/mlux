@@ -1,17 +1,38 @@
 'use strict'
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import StoreManager from './StoreManager';
 import equlas from './equlas';
 
+const PREFIX = 'binder_';
+var binders = {
 
-function bindListener(stores, listener) {
-    for(let o in stores){
-        StoreManager.add
-    }
-}
-function removeListener(stores,subscription) {
+};
 
-}
+var changedStores = {}
+var id = 1;
+
+var timeout;
+StoreManager.addListener('change', function (storeName) {
+    clearTimeout(timeout);
+    changedStores[storeName] = true;
+    timeout = setTimeout(function () {
+        //派发更新
+        for (let id in binders) {
+            let binder = binders[id];
+            let subscriptions = binders[subscriptions];
+            for (let storeName in changedStores) {
+                if (subscriptions[storeName]) {
+                    let subscription = subscriptions[storeName];
+                    setTimeout(function () {
+                        binder.update();
+                    }, 1);
+                    break;
+                }
+            }
+        }
+        changedStores = {};
+    }, 10);
+});
 function parseBindProp(bindProp) {
     if (!bindProp) {
         return {};
@@ -40,21 +61,35 @@ function parseBindProp(bindProp) {
 export default class Binder extends Component {
     constructor(...props) {
         super(...props);
-        this._stores = parseBindProp(this.props.bind);
+        this.subscriptions = parseBindProp(this.props.bind);
+        this.id = PREFIX + id;
+        id++;
+
     }
     componentWillReceiveProps(nextProps) {
         if (nextProps.bind != this.props.bind) {
-            this._stores = parseBindProp(this.props.bind);
+            this.subscriptions = parseBindProp(nextProps.bind);
         }
     }
-
-    componentWillMount() {
-
+    componentDidMount() {
+        binders[this.id] = this;
     }
     componentWillUnmount() {
+        delete binders[this.id];
+    }
+    bindListener() {
 
+    }
+    removeListener() {
+
+    }
+    update() {
+        this.forceUpdate();
     }
     render() {
         return this.props.children;
     }
+}
+Binder.propTypes = {
+    bind: PropTypes.string
 }
