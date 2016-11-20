@@ -30,7 +30,7 @@ export default class Store extends EventEmitter {
         this.name = config.name;
         this._flow = config.flow;
         this._onFlow = config.onFlow;
-        this.pump = config.pump;
+        this._pump = config.pump;
         //是否同步到本地
         this._storage = config.storage;
         this._manager = storeManager;
@@ -72,6 +72,25 @@ export default class Store extends EventEmitter {
             dst[o] = this[o];
         }
         return dst;
+    }
+    assign(data){
+        for(var o in data){
+            if(this[o]&&isSameType(this[o],data[o])){
+                this[o] = data[o]
+            }
+        }
+    }
+    pump(...args){
+        if(isFunction(this._pump)){
+            return this._pump(...args).then((data)=>{
+                this.assign(data);
+                return this;
+            })
+        }else {
+            return new Promise(function(res,rej){
+                res(this);
+            })
+        }
     }
     // setter(data) {
     //     if (this.storage) {
