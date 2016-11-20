@@ -64,7 +64,7 @@ export default class EventEmitter {
 
     }
     emit(type, ...args) {
-        var listeners = this._container.getCan(type).listeners;
+        var listeners = this._container.getVendor(type).listeners;
         for(let l in listeners){
             listeners[l](...args);
         }

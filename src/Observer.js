@@ -1,5 +1,6 @@
 'use strict'
 import equlas from './equlas';
+import {isSameType} from './util';
 function observer(obj, callback) {
     for (var o in obj) {
         observerProp(obj,o,callback);
@@ -12,10 +13,14 @@ function observerProp(object, prop, callback) {
             return _value;
         },
         set: function (value) {
+            if(!isSameType(value,_value)){
+                throw new Error('trying to change the type of store property '+object.name+' '
+                +prop +' :you can not  change the type of store property');
+            }
             if(!equlas(_value,value)){
                 _value = value;
+                callback(object);
             }
-            callback(object);
         },
         configurable:false
     });

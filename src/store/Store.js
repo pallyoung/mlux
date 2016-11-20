@@ -18,14 +18,14 @@ const EVENT_STORAGE = 'storage';//存储
 const EVENT_GET = 'get';//获取
 const EVENT_SET = 'get';//获取
 
-function observerCallback(store){
+function observerCallback(store) {
     store.notifyChange();
 }
 export default class Store extends EventEmitter {
     constructor(config, storeManager) {
         super();
-        if(!isObject(config.data)){
-            throw new Error( 'initialize '+config.name+' error, data can noly be an object');
+        if (!isObject(config.data)) {
+            throw new Error('initialize ' + config.name + ' error, data can noly be an object');
         }
         this._name = config.name;
         this._flow = config.flow;
@@ -36,23 +36,29 @@ export default class Store extends EventEmitter {
         this._manager = storeManager;
         this._timeout;
 
-        for(let o in this){
-            Object.defineProperty(this,o,{
-                value:this[o],
-                writable:false,
-                enumerable:false,
-                configurable:false
+        for (let o in this) {
+            Object.defineProperty(this, o, {
+                value: this[o],
+                writable: false,
+                enumerable: false,
+                configurable: false
             })
         }
-        for(let o in config.data){
+        Object.defineProperty(this, '_timeout', {
+            value: undefined,
+            writable: true,
+            enumerable: false,
+            configurable: false
+        })
+        for (let o in config.data) {
             this[o] = config.data[o];
         }
-        observer(this,observerCallback);
+        observer(this, observerCallback);
     }
     notifyChange() {
         clearTimeout(this._timeout);
         this._timeout = setTimeout(() => {
-            if(this.storage){
+            if (this.storage) {
                 this.manager.syncStorage(this._name, this.copy());
             }
             this.emit(EVENT_CHNAGE);
@@ -60,9 +66,9 @@ export default class Store extends EventEmitter {
         }, 10);
 
     }
-    copy(){
+    copy() {
         var dst = {}
-        for(let o in this){
+        for (let o in this) {
             dst[o] = this[o];
         }
         return dst;
