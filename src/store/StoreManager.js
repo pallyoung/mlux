@@ -78,11 +78,11 @@ class StoreManager extends EventEmitter{
         }    
     }
 
-    flow(flowIn,flows,data){
+    flow(flowIn,flows){
         flows.forEach((storeName)=>{
             let store = this[storeName];
             if(store.onFlow){
-                store.onFlow(flowIn,data);
+                store.onFlow(flowIn);
             }         
         })      
     }

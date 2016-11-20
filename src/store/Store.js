@@ -62,6 +62,7 @@ export default class Store extends EventEmitter {
             if (this._storage) {
                 this.manager.syncStorage(this.name, this.copy());
             }
+            this.flowTo();
             this.emit(EVENT_CHNAGE);
             this._manager.emit(EVENT_CHNAGE, this.name);
         }, 10);
@@ -93,6 +94,19 @@ export default class Store extends EventEmitter {
             return new Promise(function(res,rej){
                 res(this);
             })
+        }
+    }
+    flowTo(){
+        if(isArray(this._flow)){
+            this._flow.forEach((storeName)=>{
+                let store = this._manager[storeName];
+                store.onFlow(this);
+            });
+        }
+    }
+    onFlow(store){
+        if(isFunction(this._onFlow)){
+            this._onFlow(store);
         }
     }
     // setter(data) {
