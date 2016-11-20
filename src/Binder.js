@@ -1,6 +1,6 @@
 'use strict'
 import React, { Component, PropTypes } from 'react';
-import StoreManager from './StoreManager';
+import StoreManager from './store/StoreManager';
 import equlas from './equlas';
 
 const PREFIX = 'binder_';
