@@ -74,8 +74,10 @@ export default class Store extends EventEmitter {
         return dst;
     }
     assign(data){
-        for(var o in data){
-            if(this[o]&&isSameType(this[o],data[o])){
+        for(let o in data){
+            let oldValue = this[o];
+            let newValue = data[o];
+            if(oldValue && isSameType(oldValue,newValue)){
                 this[o] = data[o]
             }
         }
