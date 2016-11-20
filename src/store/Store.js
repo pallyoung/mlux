@@ -88,5 +88,3 @@ export default class Store extends EventEmitter {
     //     return this.data;
     // }
 }
-
-Store.interval = interval;
