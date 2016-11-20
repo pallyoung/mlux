@@ -5,6 +5,7 @@ import {
     isObject,
     isArray,
     isFunction,
+    isSameType
 } from './../util';
 
 import observer from './../Observer';
