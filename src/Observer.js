@@ -20,3 +20,4 @@ function observerProp(object, prop, callback) {
         configurable:false
     });
 }
+export default observer;
