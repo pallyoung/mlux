@@ -6,17 +6,21 @@ import {
     isArray,
     isFunction,
 } from './../util';
+
+import observer from './../Observer';
+
 /**
  * todo
  */
-const interval = 10 * 60 * 1000;//默认10分钟更新一次
-
 const EVENT_CHNAGE = 'change';//数据发生改变
 const EVENT_ERROR = 'error';//操作失败
 const EVENT_STORAGE = 'storage';//存储
 const EVENT_GET = 'get';//获取
 const EVENT_SET = 'get';//获取
 
+function observerCallback(store){
+    store.notifyChange();
+}
 export default class Store extends EventEmitter {
     constructor(config, storeManager) {
         super();
@@ -43,6 +47,7 @@ export default class Store extends EventEmitter {
         for(let o in config.data){
             this[o] = config.data[o];
         }
+        observer(this,observerCallback);
     }
     notifyChange() {
         clearTimeout(this._timeout);

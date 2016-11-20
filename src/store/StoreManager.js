@@ -56,7 +56,6 @@ class StoreManager extends EventEmitter{
             }       
         }
         let store = new Store(config,this);
-        console.log(store.copy())
         Object.defineProperty(this,config.name,{
             value:store,
             writable:false,
