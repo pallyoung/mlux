@@ -21,7 +21,7 @@ class StoreManager extends EventEmitter{
         for(let o in this){
             Object.defineProperty(this,o,{
                 value:this[o],
-                writable:false,
+                writable:true,
                 enumerable:false,
                 configurable:false
             })
@@ -56,9 +56,7 @@ class StoreManager extends EventEmitter{
             }       
         }
         let store = new Store(config,this);
-        console.log(233232323232)
         console.log(store.copy())
-        console.log(323232323232)
         Object.defineProperty(this,config.name,{
             value:store,
             writable:false,

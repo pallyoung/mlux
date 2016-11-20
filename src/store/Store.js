@@ -60,7 +60,7 @@ export default class Store extends EventEmitter {
         for(let o in this){
             dst[o] = this[o];
         }
-        return copy;
+        return dst;
     }
     // setter(data) {
     //     if (this.storage) {
