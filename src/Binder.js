@@ -19,13 +19,15 @@ StoreManager.addListener('change', function (storeName) {
         //派发更新
         for (let id in binders) {
             let binder = binders[id];
-            let subscriptions = binders[subscriptions];
+            let subscriptions = binder.subscriptions;
             for (let storeName in changedStores) {
                 if (subscriptions[storeName]) {
                     let subscription = subscriptions[storeName];
-                    setTimeout(function () {
-                        binder.update();
-                    }, 1);
+                    setTimeout((function (binder) {
+                       return function(){
+                            binder.update();
+                       }
+                    })(binder), 1);
                     break;
                 }
             }
@@ -63,6 +65,9 @@ export default class Binder extends Component {
         super(...props);
         this.subscriptions = parseBindProp(this.props.bind);
         this.id = PREFIX + id;
+        this.state = {
+            update:Date.now()
+        }
         id++;
 
     }
@@ -84,7 +89,7 @@ export default class Binder extends Component {
 
     }
     update() {
-        this.forceUpdate();
+        this.props.context.forceUpdate();
     }
     render() {
         return this.props.children;
