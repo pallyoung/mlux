@@ -27,7 +27,7 @@ export default class Store extends EventEmitter {
         if (!isObject(config.data)) {
             throw new Error('initialize ' + config.name + ' error, data can noly be an object');
         }
-        this._name = config.name;
+        this.name = config.name;
         this._flow = config.flow;
         this._onFlow = config.onFlow;
         this.pump = config.pump;
@@ -58,11 +58,11 @@ export default class Store extends EventEmitter {
     notifyChange() {
         clearTimeout(this._timeout);
         this._timeout = setTimeout(() => {
-            if (this.storage) {
-                this.manager.syncStorage(this._name, this.copy());
+            if (this._storage) {
+                this.manager.syncStorage(this.name, this.copy());
             }
             this.emit(EVENT_CHNAGE);
-            this.manager.emit(EVENT_CHNAGE, this._name);
+            this._manager.emit(EVENT_CHNAGE, this.name);
         }, 10);
 
     }
