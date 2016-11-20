@@ -1,9 +1,8 @@
 'use strict'
 import Dispatcher from './dispatcher/Dispatcher';
-import ControllerManager from './controller/ControllerManager';
 import StoreManager from './store/StoreManager';
 
-
+import Binder from './Binder';
 var dispatcher = new Dispatcher();
 var cm = new ControllerManager();
 
@@ -26,7 +25,6 @@ var cm = new ControllerManager();
 //     storeManager.handleAction(payload.action, payload.data);
 // });
 export default {
-   // Dispatcher: dispatcher,
-    ControllerManager: cm,
-    StoreManager: StoreManager
+    StoreManager,
+    Binder
 }
