@@ -1,6 +1,11 @@
 'use strict'
 import EventEmitter from './../EventEmitter';
 import emptyMethod from './../emptyMethod';
+import {
+    isObject,
+    isArray,
+    isFunction,
+} from './../util';
 /**
  * todo
  */
@@ -15,37 +20,54 @@ const EVENT_SET = 'get';//获取
 export default class Store extends EventEmitter {
     constructor(config, storeManager) {
         super();
-        this.name = config.name;
-        //远程地址，只配置一个
-        //this._remote = config.remote;
-        //更新间隔  
-        //this.interval =  config.interval||-1;
-        //
-        this.data = config.data||undefined;
-        this.flow = config.flow;
-        this.onFlow = config.onFlow;
-        //是否设置缓存，如果设置缓存 可以通过storageManager直接访问 
-        this.cache = true;
-        //是否同步到本地
-        this.storage = config.storage;
-        this.timestamp = 0;
-        this.manager = storeManager;
-    }
-    notifyChange(){
-        this.emit(EVENT_CHNAGE);
-    }
-    // clear(){
-    //     delete this.data;
-    // }
-    setter(data) {
-
-        if (this.storage) {
-            this.manager.syncStorage(this.name, data);
+        if(!isObject(config.data)){
+            throw new Error( 'initialize '+config.name+' error, data can noly be an object');
         }
-        this.data = data;
-        //this.manager[this.name] = data;
-        //this.emit(EVENT_CHNAGE);
+        this._name = config.name;
+        this._flow = config.flow;
+        this._onFlow = config.onFlow;
+        this.pump = config.pump;
+        //是否同步到本地
+        this._storage = config.storage;
+        this._manager = storeManager;
+        this._timeout;
+
+        for(let o in this){
+            Object.defineProperty(this,o,{
+                value:this[o],
+                writable:false,
+                enumerable:false,
+                configurable:false
+            })
+        }
+        for(let o in config.data){
+            this[o] = config.data[o];
+        }
     }
+    notifyChange() {
+        clearTimeout(this._timeout);
+        this._timeout = setTimeout(() => {
+            if(this.storage){
+                this.manager.syncStorage(this._name, this.copy());
+            }
+            this.emit(EVENT_CHNAGE);
+            this.manager.emit(EVENT_CHNAGE, this._name);
+        }, 10);
+
+    }
+    copy(){
+        var dst = {}
+        for(let o in this){
+            dst[o] = this[o];
+        }
+        return copy;
+    }
+    // setter(data) {
+    //     if (this.storage) {
+    //         this.manager.syncStorage(this.name, data);
+    //     }
+    //     this.data = data;
+    // }
     /**
      * 
      * 
@@ -54,17 +76,12 @@ export default class Store extends EventEmitter {
      * 
      * @memberOf Store
      * @获取流程
-     *      |----是否有本地存储
-     *      |           |
-     *      |           |--是-return this.stroage
-     *      |           |
-     *      |           |--否-return this.data
      * 
      * 
      */
-    getter() {
-        return this.data;
-    }
+    // getter() {
+    //     return this.data;
+    // }
 }
 
 Store.interval = interval;

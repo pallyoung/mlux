@@ -2,7 +2,14 @@
 import EventEmitter from './../EventEmitter';
 import Store from './Store';
 import emptyMethod from './../emptyMethod';
-var _storeVan = {}
+import equlas from './../equlas';
+import observer from './../Observer';
+import {
+isObject,
+isArray,
+isFunction,
+isSameType
+}from './util';
 //todo:脏值检测
 class StoreManager extends EventEmitter{
     constructor(){
@@ -10,6 +17,14 @@ class StoreManager extends EventEmitter{
         this.storageTool = {
             setter:emptyMethod,
             getter:emptyMethod
+        }
+        for(let o in this){
+            Object.defineProperty(this,o,{
+                value:this[o],
+                writable:false,
+                enumerable:false,
+                configurable:false
+            })
         }
     }
     setStorageTool(tool){
@@ -30,41 +45,32 @@ class StoreManager extends EventEmitter{
         store.notifyChange();
         this.emit('change',storeName);
     }
-    register(config){
-        var store = new Store(config,this);
-        _storeVan[config.name] = store;
+    async register(config){
+        if(config.storage){
+            let cache =  await this.manager.syncStorage(config.name);
+            if(isObject(cache)){
+                for(let o in config.data){
+                    if(cache[o])
+                    config.data[o]  = cache[o];
+                }
+            }       
+        }
+        let store = new Store(config,this);
         Object.defineProperty(this,config.name,{
             get:()=>{
-                store.getter();
-                return store.data;
+                return store;
             },
-            set:(value)=>{
-                store.setter(value);
-                store.notifyChange();
-                this.emit('change',config.name);
-            }
+            configurable:true,
+            enumerable:true
         });
-        if(config.storage){
-            return this.manager.syncStorage(this.name);
-        }
-        // this['get'+config.name.slice(0,1).toUpperCase()+config.name.slice(1)] = function(...args){
-        //     return _storeVan[name].getter(...args);
-        // }
+        Object.preventExtensions(store);
     }
     unregister(name){
-        var store = _storeVan[name];
+        var store = this[name];
         //移除所有监听事件
         store.removeAllListeners();
-        delete _storeVan[name];
         delete this[name];
-        //delete this['get'+name.slice(0,1).toUpperCase()+name.slice(1)];
     }
-    // getter(name,...args){
-    //     return _storeVan[name].getter(...args);
-    // }
-    // setter(name,data){
-    //     return _storeVan[name].setter(data);
-    // }
     syncStorage(name,value){
         if(value){
             return this.storageTool.setter(name,value);
@@ -72,12 +78,10 @@ class StoreManager extends EventEmitter{
             return this.storageTool.getter(name);
         }    
     }
-    // fetch(remote,...args){
-    //     return this.remoteTool.fetch(remote,...args);
-    // }
+
     flow(flowIn,flows,data){
         flows.forEach((storeName)=>{
-            let store = _storeVan[storeName];
+            let store = this[storeName];
             if(store.onFlow){
                 store.onFlow(flowIn,data);
             }         
@@ -85,5 +89,5 @@ class StoreManager extends EventEmitter{
     }
     
 }
-
-export default StoreManager;
+var manager = new StoreManager();
+export default manager;

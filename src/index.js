@@ -6,7 +6,6 @@ import StoreManager from './store/StoreManager';
 
 var dispatcher = new Dispatcher();
 var cm = new ControllerManager();
-var storeManager = new StoreManager();
 
 // storeManager.actions = {};
 // storeManager.handleAction = function (action, data) {
@@ -29,5 +28,5 @@ var storeManager = new StoreManager();
 export default {
    // Dispatcher: dispatcher,
     ControllerManager: cm,
-    StoreManager: storeManager
+    StoreManager: StoreManager
 }
