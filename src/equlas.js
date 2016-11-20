@@ -13,6 +13,9 @@ export default function equlas(s1,s2){
         return false;
     }
     if(isArray(s1)){
+        if(s1.length!==s2.length){
+            return false;
+        }
         for(var i = 1;i<s1.length;i++){
             if (!equlas(s1[i],s2[i])){
                 return false;

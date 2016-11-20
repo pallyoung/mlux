@@ -79,7 +79,7 @@ export default class Store extends EventEmitter {
             let oldValue = this[o];
             let newValue = data[o];
             if(oldValue && isSameType(oldValue,newValue)){
-                this[o] = data[o]
+                this[o] = newValue
             }
         }
     }
