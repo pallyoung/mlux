@@ -1,5 +1,5 @@
 'use strict'
-import equlas from '/equlas';
+import equlas from './equlas';
 function observer(obj, callback) {
     for (var o in obj) {
         observerProp(obj,o,callback);
