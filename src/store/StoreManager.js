@@ -9,7 +9,7 @@ isObject,
 isArray,
 isFunction,
 isSameType
-}from './util';
+}from './../util';
 //todo:脏值检测
 class StoreManager extends EventEmitter{
     constructor(){
