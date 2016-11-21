@@ -60,7 +60,7 @@ export default class Store extends EventEmitter {
         clearTimeout(this._timeout);
         this._timeout = setTimeout(() => {
             if (this._storage) {
-                this.manager.syncStorage(this.name, this.copy());
+                this._manager.syncStorage(this.name, this.copy());
             }
             this.flowTo();
             this.emit(EVENT_CHNAGE);

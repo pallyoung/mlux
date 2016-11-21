@@ -91,10 +91,10 @@ export default class Binder extends Component {
 
     }
     update() {
-       this.mounted && this.props.context.forceUpdate();
+       this.mounted && this.forceUpdate();
     }
     render() {
-        return this.props.children;
+        return this.props.render();
     }
 }
 Binder.propTypes = {
