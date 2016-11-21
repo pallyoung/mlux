@@ -78,8 +78,10 @@ export default class Binder extends Component {
     }
     componentDidMount() {
         binders[this.id] = this;
+        this.mounted = true;
     }
     componentWillUnmount() {
+        this.mounted = false;
         delete binders[this.id];
     }
     bindListener() {
@@ -89,7 +91,7 @@ export default class Binder extends Component {
 
     }
     update() {
-        this.props.context.forceUpdate();
+       this.mounted && this.props.context.forceUpdate();
     }
     render() {
         return this.props.children;

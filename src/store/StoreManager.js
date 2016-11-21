@@ -47,7 +47,7 @@ class StoreManager extends EventEmitter{
     }
     async register(config){
         if(config.storage){
-            let cache =  await this.manager.syncStorage(config.name);
+            let cache =  await this.syncStorage(config.name);
             if(isObject(cache)){
                 for(let o in config.data){
                     if(cache[o])
