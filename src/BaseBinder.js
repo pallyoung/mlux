@@ -5,24 +5,27 @@ export default class BaseBinder extends Component {
         super(...props);
         this.store = this.props.store;
         this.listener;
+        this.mounted;
     }
     componentWillReceiveProps(nextProps) {
-        if(nextProps.store!=this.store){
+        if (nextProps.store != this.store) {
             this.store.removeListener(this.listener)
             this.store = nextProps.store;
-            this.listener = this.store.addListener('change',()=>{
+            this.listener = this.store.addListener('change', () => {
                 this.forceUpdate();
             });
         }
     }
     componentDidMount() {
-        this.listener = this.store.addListener('change',()=>{
-            this.forceUpdate();
+        this.mounted = true
+        this.listener = this.store.addListener('change', () => {
+            this.mounted && this.forceUpdate();
         })
     }
     componentWillUnmount() {
+        this.mounted = false;
         this.store.removeListener(this.listener)
-    }      
+    }
     render() {
         var Component = this.props.component;
         var passProps = this.props.passProps || {};

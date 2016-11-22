@@ -100,15 +100,29 @@ export default class Binder extends Component {
 }
 
 Binder.propTypes = {
-    bind:PropTypes.oneOfType([PropTypes.object,PropTypes.string]),
-    render:PropTypes.func
+    bind: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+    render: PropTypes.func
 }
-Binder.create = function (Component, bind,props) {
-    props = props||{};
+Binder.createElement = function (Component, bind, props) {
+    props = props || {};
     if (isString(bind)) {
-        return <Binder bind={bind} render={() => <Component {...props}/>} />
+        return <Binder bind={bind} render={() => <Component {...props} />} />
     }
     if (type(bind) == 'store') {
-        return <BaseBinder store = {bind} passProps = {props} component = {Component}/>
+        return <BaseBinder store={bind} passProps={props} component={Component} />
     }
+}
+Binder.createClass = function (Component) {
+    return React.createClass({
+        render: function () {
+            var bind = this.props.bind||'';
+            if (isString(bind)) {
+                return <Binder bind={bind} render={() => <Component {...props} />} />
+            }
+            if (type(bind) == 'store') {
+                return <BaseBinder store={bind} passProps={props} component={Component} />
+            }
+            return null;
+        }
+    })
 }
