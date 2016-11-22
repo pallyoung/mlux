@@ -115,12 +115,12 @@ Binder.createElement = function (Component, bind, props) {
 Binder.createClass = function (Component) {
     return React.createClass({
         render: function () {
-            var bind = this.props.bind||'';
+            var bind = this.props.bind || '';
             if (isString(bind)) {
-                return <Binder bind={bind} render={() => <Component {...props} />} />
+                return <Binder bind={bind} render={() => <Component {...this.props} />} />
             }
             if (type(bind) == 'store') {
-                return <BaseBinder store={bind} passProps={props} component={Component} />
+                return <BaseBinder store={bind} passProps={this.props} component={Component} />
             }
             return null;
         }
