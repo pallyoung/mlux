@@ -1,6 +1,6 @@
 'use strict'
 import StoreManager from './store/StoreManager';
-
+import Store from './store/Store';
 import Binder from './Binder';
 import {
     type,
@@ -28,11 +28,18 @@ var module = {
     isString,
     isNumber,
     isBoolean,
-    isUndefined
+    isUndefined,
+    Store
+}
+
+function createStore(config){
+    config.storage = false;
+    return new Store(config,manager);
 }
 export {
     module as default,
     StoreManager,
+    createStore,
     Binder,
     type,
     isObject,

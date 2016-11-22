@@ -2,7 +2,8 @@
 import React, { Component, PropTypes } from 'react';
 import StoreManager from './store/StoreManager';
 import equlas from './equlas';
-
+import BaseBinder from './BaseBinder';
+import { isString, type } from './util';
 const PREFIX = 'binder_';
 var binders = {
 
@@ -24,9 +25,9 @@ StoreManager.addListener('change', function (storeName) {
                 if (subscriptions[storeName]) {
                     let subscription = subscriptions[storeName];
                     setTimeout((function (binder) {
-                       return function(){
+                        return function () {
                             binder.update();
-                       }
+                        }
                     })(binder), 1);
                     break;
                 }
@@ -66,7 +67,7 @@ export default class Binder extends Component {
         this.subscriptions = parseBindProp(this.props.bind);
         this.id = PREFIX + id;
         this.state = {
-            update:Date.now()
+            update: Date.now()
         }
         id++;
 
@@ -91,12 +92,22 @@ export default class Binder extends Component {
 
     }
     update() {
-       this.mounted && this.forceUpdate();
+        this.mounted && this.forceUpdate();
     }
     render() {
         return this.props.render();
     }
 }
+
 Binder.propTypes = {
     bind: PropTypes.string
+}
+Binder.create = function (Component, bind,props) {
+    props = props||{};
+    if (isString(bind)) {
+        return <Binder bind={bind} render={() => <Component {...props}/>} />
+    }
+    if (type(bind) == 'store') {
+        return <BaseBinder store = {bind} passProps = {props} component = {Component}/>
+    }
 }
