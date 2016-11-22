@@ -39,7 +39,7 @@ class Container {
     }
     removeAllListeners(type){
         if(type){
-            this._vendors[type] = undefined;
+            delete this._vendors[type];
         }else{
             this._vendors = {}
         }   
@@ -49,7 +49,6 @@ class Container {
 export default class EventEmitter {
     constructor() {
         this._container = new Container();
-        this._currentSubcription = null;
     }
     addListener(type, listener) {
         return this._container.addListener(type,listener);
@@ -60,13 +59,12 @@ export default class EventEmitter {
     removeAllListeners(type){
         this._container.removeAllListeners(type)
     }
-    once(type, listener) {
-
-    }
     emit(type, ...args) {
         var listeners = this._container.getVendor(type).listeners;
         for(let l in listeners){
-            listeners[l](...args);
+            setTimeout(function(){
+                listeners[l](...args);
+            },0);        
         }
     }
 }
