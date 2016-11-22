@@ -11,11 +11,6 @@
   "directories": {
     "example": "examples"
   },
-  "dist": {
-    "shasum": "5184ddac76a3649a2b40c630e20bc5ae4acc6145",
-    "tarball": "http://120.27.220.11:4873/mlux/-/mlux-0.0.1.tgz"
-  },
-  "gitHead": "b0a7255f4e6e61a45bb97275ef26207db706319d",
   "homepage": "https://github.com/pallyoung/mlux#readme",
   "keywords": [
     "react",
@@ -34,5 +29,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "0.0.2"
+  "version": "0.1.0"
 }
