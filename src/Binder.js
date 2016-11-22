@@ -100,7 +100,8 @@ export default class Binder extends Component {
 }
 
 Binder.propTypes = {
-    bind: PropTypes.string
+    bind:PropTypes.oneOfType([PropTypes.object,PropTypes.string]),
+    render:PropTypes.func
 }
 Binder.create = function (Component, bind,props) {
     props = props||{};
