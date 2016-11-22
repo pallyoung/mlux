@@ -1,10 +1,48 @@
 'use strict'
-import Dispatcher from './dispatcher/Dispatcher';
 import StoreManager from './store/StoreManager';
 
 import Binder from './Binder';
-
-export default {
+import {
+    type,
+    isObject,
+    isArray,
+    isFunction,
+    isSameType,
+    isEmpty,
+    isNull,
+    isString,
+    isNumber,
+    isBoolean,
+    isUndefined
+} from './util';
+var module = {
     StoreManager,
-    Binder
+    Binder,
+    type,
+    isObject,
+    isArray,
+    isFunction,
+    isSameType,
+    isEmpty,
+    isNull,
+    isString,
+    isNumber,
+    isBoolean,
+    isUndefined
+}
+export {
+    module as default,
+    StoreManager,
+    Binder,
+    type,
+    isObject,
+    isArray,
+    isFunction,
+    isSameType,
+    isEmpty,
+    isNull,
+    isString,
+    isNumber,
+    isBoolean,
+    isUndefined
 }
