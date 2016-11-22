@@ -34,7 +34,7 @@ var module = {
 
 function createStore(config){
     config.storage = false;
-    return new Store(config,manager);
+    return new Store(config,StoreManager);
 }
 export {
     module as default,
