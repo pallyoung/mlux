@@ -35,6 +35,9 @@ class Container {
                 };
     }
     removeListener(subscription) {
+        if(!subscription){
+            return;
+        }
         this.getVendor(subscription.type).removeListener(subscription.token);
     }
     removeAllListeners(type){

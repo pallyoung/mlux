@@ -3,7 +3,7 @@ import React, { Component, PropTypes } from 'react';
 import StoreManager from './store/StoreManager';
 import equlas from './equlas';
 import BaseBinder from './BaseBinder';
-import { isString, type } from './util';
+import { isString, type,isFunction } from './util';
 const PREFIX = 'binder_';
 var binders = {
 
@@ -109,18 +109,22 @@ Binder.createElement = function (Component, bind, props) {
         return <Binder bind={bind} render={() => <Component {...props} />} />
     }
     if (type(bind) == 'store') {
-        return <BaseBinder store={bind} passProps={props} component={Component} />
+        return <BaseBinder store={bind} getProps={()=>props} component={Component} />
     }
 }
 Binder.createClass = function (Component) {
     return React.createClass({
         render: function () {
             var bind = this.props.bind || '';
-            if (isString(bind)) {
-                return <Binder bind={bind} render={() => <Component {...this.props} />} />
+            var props = {};
+            if(isFunction(this.props.getProps)){
+                props = this.props.getProps()||{}
+            }
+            if (isString(bind)) {        
+                return <Binder bind={bind} render={() => <Component {...props} />} />
             }
             if (type(bind) == 'store') {
-                return <BaseBinder store={bind} passProps={this.props} component={Component} />
+                return <BaseBinder store={bind} passProps = {props} component={Component} />
             }
             return null;
         }
