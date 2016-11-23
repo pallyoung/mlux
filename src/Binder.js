@@ -2,117 +2,97 @@
 import React, { Component, PropTypes } from 'react';
 import StoreManager from './store/StoreManager';
 import equlas from './equlas';
-import ComponentBinder from './ComponentBinder';
-import { isString, type,isFunction } from './util';
-const PREFIX = 'binder_';
-var binders = {
-
-};
-
-var changedStores = {}
+import { isString, type, isFunction, isArray } from './util';
 var id = 1;
+const PERFIX = 'BINDER_STORE_';
 
-var timeout;
-StoreManager.addListener('change', function (storeName) {
-    clearTimeout(timeout);
-    changedStores[storeName] = true;
-    timeout = setTimeout(function () {
-        //派发更新
-        for (let id in binders) {
-            let binder = binders[id];
-            let subscriptions = binder.subscriptions;
-            for (let storeName in changedStores) {
-                if (subscriptions[storeName]) {
-                    let subscription = subscriptions[storeName];
-                    setTimeout((function (binder) {
-                        return function () {
-                            binder.update();
-                        }
-                    })(binder), 1);
-                    break;
-                }
-            }
-        }
-        changedStores = {};
-    }, 10);
-});
-function parseBindProp(bindProp) {
-    if (!bindProp) {
-        return {};
-    }
-    var storeStrings = bindProp.split(/\s+/);
-    var stores = {};
-    for (let i = storeStrings.length - 1; i >= 0; i--) {
-        let storeString = storeStrings[i];
-        if (storeString.indexOf('.') != -1) {
-            let params = storeString.split('.');
-            let storeName = params[0];
-            stores[storeName] = stores[storeName] || {
-                name: storeName,
-                keys: []
-            }
-            stores[storeName].keys.push(params[1]);
-        } else {
-            stores[storeString] = {
-                name: storeString,
-                keys: []
-            }
-        }
-    }
-    return stores;
+function getId() {
+    id++;
+    return PERFIX + id;
 }
+
 export default class Binder extends Component {
     constructor(...props) {
         super(...props);
-        // this.subscriptions = parseBindProp(this.props.bind);
-        // this.id = PREFIX + id;
-        // this.state = {
-        // }
-        // id++;
+        this.stores = this._getStoreFromProps(this.props);
+        this.listener = () => {
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => this.mounted && this.forceUpdate(), 10);
+        };
+        this.mounted;
+        this.timeout;
+        this.listenerTokens = {};
+    }
+    _getStoreFromProps(props) {
+        var stores = {};
+        if (isArray(props.bind)) {
+            props.bind.forEach(function (s) {
+                stores[getId()] = s;
+            });
+        } else {
+            stores[getId()] = props.bind;
+        }
+        return stores;
 
     }
+    _bind() {
+        var stores = this.stores;
+        this.listenerTokens = {};
+        for (let s in stores) {
+            this.listenerTokens[s] = stores[s].addListener('change', this.listener);
+        }
+    }
+    _unbind() {
+        var stores = this.stores;
+        for (let s in stores) {
+            stores[s].removeListener(this.listenerTokens[s]);
+        }
+        this.listenerTokens = {}
+    }
+
     componentWillReceiveProps(nextProps) {
-        // if (nextProps.bind != this.props.bind) {
-        //     this.subscriptions = parseBindProp(nextProps.bind);
+        // if (nextProps.store != this.store) {
+        //     this.store.removeListener(this.listener)
+        //     this.store = nextProps.store;
+        //     this.listener = this.
         // }
     }
     componentDidMount() {
-        // binders[this.id] = this;
-        // this.mounted = true;
+        this.mounted = true
+        this._bind();
     }
     componentWillUnmount() {
-        // this.mounted = false;
-        // delete binders[this.id];
+        this.mounted = false;
+        this._unbind();
     }
-    // update() {
-    //     this.mounted && this.forceUpdate();
-    // }
     render() {
-        var Component = React.createClass({
-            render:this.props.render
-        })
-        return <ComponentBinder store={this.props.bind} component = {Component}/>
+        return this.props.render()
     }
 }
 
 Binder.propTypes = {
-    bind: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+    bind: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     render: PropTypes.func
 }
 Binder.createElement = function (Component, bind, props) {
     props = props || {};
-    return <ComponentBinder store={bind} getProps={()=>props} component={Component} /> ;
-        
+    return <Binder bind={bind} render={() => <Component {...props} />} />;
+
 }
 Binder.createClass = function (Component) {
     return React.createClass({
         render: function () {
-            var bind = this.props.bind || '';
-            var props = {};
-            if(isFunction(this.props.getProps)){
-                props = this.props.getProps()||{}
-            }
-            return <ComponentBinder store={bind} passProps = {props} component={Component} />
+            var bind = this.props.bind || [];
+            var getProps = this.props.getProps;
+            return <Binder 
+                    bind={bind}
+                    render={() =>{
+                         var props = {};
+                         var props = {};
+                         if (isFunction(getProps)) {
+                            props = getProps() || {}
+                         }
+                        return  <Component {...props} />}} />
         }
     })
 }
