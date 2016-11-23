@@ -2,7 +2,7 @@
 import React, { Component, PropTypes } from 'react';
 import StoreManager from './store/StoreManager';
 import equlas from './equlas';
-import BaseBinder from './BaseBinder';
+import ComponentBinder from './ComponentBinder';
 import { isString, type,isFunction } from './util';
 const PREFIX = 'binder_';
 var binders = {
@@ -64,38 +64,34 @@ function parseBindProp(bindProp) {
 export default class Binder extends Component {
     constructor(...props) {
         super(...props);
-        this.subscriptions = parseBindProp(this.props.bind);
-        this.id = PREFIX + id;
-        this.state = {
-            update: Date.now()
-        }
-        id++;
+        // this.subscriptions = parseBindProp(this.props.bind);
+        // this.id = PREFIX + id;
+        // this.state = {
+        // }
+        // id++;
 
     }
     componentWillReceiveProps(nextProps) {
-        if (nextProps.bind != this.props.bind) {
-            this.subscriptions = parseBindProp(nextProps.bind);
-        }
+        // if (nextProps.bind != this.props.bind) {
+        //     this.subscriptions = parseBindProp(nextProps.bind);
+        // }
     }
     componentDidMount() {
-        binders[this.id] = this;
-        this.mounted = true;
+        // binders[this.id] = this;
+        // this.mounted = true;
     }
     componentWillUnmount() {
-        this.mounted = false;
-        delete binders[this.id];
+        // this.mounted = false;
+        // delete binders[this.id];
     }
-    bindListener() {
-
-    }
-    removeListener() {
-
-    }
-    update() {
-        this.mounted && this.forceUpdate();
-    }
+    // update() {
+    //     this.mounted && this.forceUpdate();
+    // }
     render() {
-        return this.props.render();
+        var Component = React.createClass({
+            render:this.props.render
+        })
+        return <ComponentBinder store={this.props.bind} component = {Component}/>
     }
 }
 
@@ -105,12 +101,8 @@ Binder.propTypes = {
 }
 Binder.createElement = function (Component, bind, props) {
     props = props || {};
-    if (isString(bind)) {
-        return <Binder bind={bind} render={() => <Component {...props} />} />
-    }
-    if (type(bind) == 'store') {
-        return <BaseBinder store={bind} getProps={()=>props} component={Component} />
-    }
+    return <ComponentBinder store={bind} getProps={()=>props} component={Component} /> ;
+        
 }
 Binder.createClass = function (Component) {
     return React.createClass({
@@ -120,13 +112,7 @@ Binder.createClass = function (Component) {
             if(isFunction(this.props.getProps)){
                 props = this.props.getProps()||{}
             }
-            if (isString(bind)) {        
-                return <Binder bind={bind} render={() => <Component {...props} />} />
-            }
-            if (type(bind) == 'store') {
-                return <BaseBinder store={bind} passProps = {props} component={Component} />
-            }
-            return null;
+            return <ComponentBinder store={bind} passProps = {props} component={Component} />
         }
     })
 }
