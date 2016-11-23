@@ -14,7 +14,7 @@ class Vendor {
         return token;
     }
     removeListener(token) {
-        delete this._listeners[token];
+        delete this.listeners[token];
     }
 }
 
