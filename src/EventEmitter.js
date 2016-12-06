@@ -32,7 +32,7 @@ class Container {
         return {
             token: this.getVendor(type).addListener(listener),
             type:type
-                };
+        };
     }
     removeListener(subscription) {
         if(!subscription){
