@@ -1,7 +1,6 @@
 'use strict'
 import StoreManager from './store/StoreManager';
 import Store from './store/Store';
-import Binder from './Binder';
 import {
     type,
     isObject,
@@ -15,9 +14,10 @@ import {
     isBoolean,
     isUndefined
 } from './util';
+import equlas from './equlas';
 var module = {
     StoreManager,
-    Binder,
+    equlas,
     type,
     isObject,
     isArray,
@@ -38,9 +38,9 @@ function createStore(config){
 }
 export {
     module as default,
+    equlas,
     StoreManager,
     createStore,
-    Binder,
     type,
     isObject,
     isArray,
