@@ -23,8 +23,14 @@ flux规范的一种实现。
 
 ## Usage
 
- 在项目根目录下执行 `npm install mlux --save`。      
- 在项目文件中引入 `import mlux from 'mlux'`;
+ 在项目根目录下执行 
+ ```
+ npm install mlux --save
+ ```      
+ 在项目文件中引入 
+ ```javascript
+ import mlux from 'mlux';
+ ```
 
 ## API Reference
 
