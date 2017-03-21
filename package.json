@@ -6,7 +6,7 @@
     "url": "https://github.com/pallyoung/mlux/issues"
   },
   "dependencies": {
-    "babel-preset-stage-3": "^6.22.0"
+   
   },
   "description": "react mvc框架",
   "devDependencies": {
@@ -14,6 +14,7 @@
     "babel-core": "^6.24.0",
     "babel-loader": "^6.4.1",
     "babel-preset-es2015": "^6.24.0",
+    "babel-preset-stage-3": "^6.22.0",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-rename": "^1.2.2",
@@ -29,8 +30,12 @@
     "mvc",
     "mlux"
   ],
+  "files":[
+    "dist/",
+   " package.json"
+  ],
   "license": "ISC",
-  "main": "src/index.js",
+  "main": "dist/mlux.js",
   "name": "mlux",
   "optionalDependencies": {},
   "readme": "ERROR: No README data found!",
@@ -41,5 +46,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "0.2.1"
+  "version": "0.2.2"
 }
