@@ -11,53 +11,8 @@ import {
     isSameType
 } from './../util';
 
-function isNative(fn) {
-    return (/\[native code\]/.test(fn));
-}
-var hasDontEnumBug = !{
-    'toString': null
-}.propertyIsEnumerable('toString');
-var hasProtoEnumBug = function () { }.propertyIsEnumerable('prototype');
-var dontEnums = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'];
-var dontEnumsLength = dontEnums.length;
-var keys = Object.keys || function (object) {
-    var theKeys = [];
-    var skipProto = hasProtoEnumBug && typeof object === 'function';
-    if (typeof object === 'string' || object && object.callee) {
-        for (var i = 0; i < object.length; ++i) {
-            theKeys.push(String(i));
-        }
-    } else {
-        for (var name in object) {
-            if (!(skipProto && name === 'prototype') && ohasOwn.call(object, name)) {
-                theKeys.push(String(name));
-            }
-        }
-    }
 
-    if (hasDontEnumBug) {
-        var ctor = object.constructor,
-            skipConstructor = ctor && ctor.prototype === object;
-        for (var j = 0; j < dontEnumsLength; j++) {
-            var dontEnum = dontEnums[j];
-            if (!(skipConstructor && dontEnum === 'constructor') && ohasOwn.call(object, dontEnum)) {
-                theKeys.push(dontEnum);
-            }
-        }
-    }
-    return theKeys;
-}
-var assign = Object.assign || function (dst, source) {
-    if (!isObject(dst) || !isObject(source)) {
-        throw new Error('the arguments of assign must be object');
-    }
-    var sourceKeys = keys(source);
-    sourceKeys.forEach(function (name) {
-        dst[name] = source[name];
-    });
-    return dst;
 
-}
 function sealProperty(object, property) {
     Object.defineProperty(object, property, {
         value: object[property],
@@ -77,10 +32,6 @@ function createStore(config, manager) {
     });
     Object.preventExtensions(store);
     return store;
-}
-//整合多个异步一起回调
-function TaskRunner() {
-
 }
 
 //todo:脏值检测

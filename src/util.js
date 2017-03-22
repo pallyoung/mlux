@@ -45,7 +45,9 @@ function isEmpty(source) {
     }
     return false;
 }
-
+function isNative(fn) {
+    return (/\[native code\]/.test(fn));
+}
 export {
     type,
     isObject,
@@ -57,5 +59,6 @@ export {
     isString,
     isNumber,
     isBoolean,
-    isUndefined
+    isUndefined,
+    isNative
 }

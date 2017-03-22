@@ -1,35 +1,11 @@
 'use strict'
 import StoreManager from './store/StoreManager';
 import Store from './store/Store';
-import {
-    type,
-    isObject,
-    isArray,
-    isFunction,
-    isSameType,
-    isEmpty,
-    isNull,
-    isString,
-    isNumber,
-    isBoolean,
-    isUndefined
-} from './util';
-import equlas from './equlas';
+import shim from './shim.js';
+
 var module = {
     StoreManager,
-    equlas,
-    type,
-    isObject,
-    isArray,
-    isFunction,
-    isSameType,
-    isEmpty,
-    isNull,
-    isString,
-    isNumber,
-    isBoolean,
-    isUndefined,
-    Store
+    createStore,
 }
 
 function createStore(config){
@@ -38,18 +14,6 @@ function createStore(config){
 }
 export {
     module as default,
-    equlas,
     StoreManager,
     createStore,
-    type,
-    isObject,
-    isArray,
-    isFunction,
-    isSameType,
-    isEmpty,
-    isNull,
-    isString,
-    isNumber,
-    isBoolean,
-    isUndefined
 }

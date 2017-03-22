@@ -92,7 +92,7 @@ StoreManager.register(storeConfig);
 通过向register方法提供storeConfig参数来配置store的默认属性。
 
 * __name__ *(String)* - store的名字，必须是唯一的，各个store之间通过name来区别。通过register方法创建的store可以直接用`StoreManager[name]`的方式来访问。必须。
-* __data__ *(JSONObject)* - store的数据结构。数据结构一旦确定，将不可更改。不可以删除或者添加store中的字段。必须。
+* __model__ *(JSONObject)* - store的数据结构。数据结构一旦确定，将不可更改。不可以删除或者添加store中的字段。必须。
 * __storage__ *(Boolean)* - 表示该store是否要数据持久化。如果设置了true，StoreManager讲通过setStorageTool方法设置的持久化工具来持久化该store。可选
 * __pump__ *(()=>Promise)* - 为store设置数据源。可以是http请求或者其他的来源。返回值必须是Promise对象。可选。
 * __flow__ *(StringArray)* - 配置当store数据发生改变时，需要通知到哪几个store知道。可选。
