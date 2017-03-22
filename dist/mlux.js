@@ -1,4 +1,14 @@
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define("MLUX", [], factory);
+	else if(typeof exports === 'object')
+		exports["MLUX"] = factory();
+	else
+		root["MLUX"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -615,15 +625,84 @@ var _util = __webpack_require__(0);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function isNative(fn) {
+    return (/\[native code\]/.test(fn)
+    );
+}
+var hasDontEnumBug = !{
+    'toString': null
+}.propertyIsEnumerable('toString');
+var hasProtoEnumBug = function () {}.propertyIsEnumerable('prototype');
+var dontEnums = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'];
+var dontEnumsLength = dontEnums.length;
+var keys = Object.keys || function (object) {
+    var theKeys = [];
+    var skipProto = hasProtoEnumBug && typeof object === 'function';
+    if (typeof object === 'string' || object && object.callee) {
+        for (var i = 0; i < object.length; ++i) {
+            theKeys.push(String(i));
+        }
+    } else {
+        for (var name in object) {
+            if (!(skipProto && name === 'prototype') && ohasOwn.call(object, name)) {
+                theKeys.push(String(name));
+            }
+        }
+    }
+
+    if (hasDontEnumBug) {
+        var ctor = object.constructor,
+            skipConstructor = ctor && ctor.prototype === object;
+        for (var j = 0; j < dontEnumsLength; j++) {
+            var dontEnum = dontEnums[j];
+            if (!(skipConstructor && dontEnum === 'constructor') && ohasOwn.call(object, dontEnum)) {
+                theKeys.push(dontEnum);
+            }
+        }
+    }
+    return theKeys;
+};
+var assign = Object.assign || function (dst, source) {
+    if (!(0, _util.isObject)(dst) || !(0, _util.isObject)(source)) {
+        throw new Error('the arguments of assign must be object');
+    }
+    var sourceKeys = keys(source);
+    sourceKeys.forEach(function (name) {
+        dst[name] = source[name];
+    });
+    return dst;
+};
+function sealProperty(object, property) {
+    Object.defineProperty(object, property, {
+        value: object[property],
+        writable: true,
+        enumerable: false,
+        configurable: false
+    });
+}
+
+function createStore(config, manager) {
+    var store = new _Store2.default(config, manager);
+    Object.defineProperty(manager, config.name, {
+        value: store,
+        writable: false,
+        configurable: true,
+        enumerable: true
+    });
+    Object.preventExtensions(store);
+    return store;
+}
+//整合多个异步一起回调
+function TaskRunner() {}
+
 //todo:脏值检测
+
 var StoreManager = function (_EventEmitter) {
     _inherits(StoreManager, _EventEmitter);
 
@@ -637,12 +716,7 @@ var StoreManager = function (_EventEmitter) {
             getter: _emptyMethod2.default
         };
         for (var o in _this) {
-            Object.defineProperty(_this, o, {
-                value: _this[o],
-                writable: true,
-                enumerable: false,
-                configurable: false
-            });
+            sealProperty(_this, o);
         }
         return _this;
     }
@@ -657,103 +731,57 @@ var StoreManager = function (_EventEmitter) {
             this.storageTool = tool;
         }
     }, {
-        key: 'mapRegister',
-        value: function () {
-            var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(configArr) {
-                var i, config;
-                return regeneratorRuntime.wrap(function _callee$(_context) {
-                    while (1) {
-                        switch (_context.prev = _context.next) {
-                            case 0:
-                                i = 0;
-
-                            case 1:
-                                if (!(i < configArr.length)) {
-                                    _context.next = 8;
-                                    break;
-                                }
-
-                                config = configArr[i];
-                                _context.next = 5;
-                                return this.register(config);
-
-                            case 5:
-                                i++;
-                                _context.next = 1;
-                                break;
-
-                            case 8:
-                            case 'end':
-                                return _context.stop();
-                        }
-                    }
-                }, _callee, this);
-            }));
-
-            function mapRegister(_x) {
-                return _ref.apply(this, arguments);
-            }
-
-            return mapRegister;
-        }()
-    }, {
         key: 'notifyChange',
         value: function notifyChange(storeName) {
-            var store = _storeVan[storeName];
+            var store = this[storeName];
             store.notifyChange();
             this.emit('change', storeName);
         }
     }, {
-        key: 'register',
-        value: function () {
-            var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(config) {
-                var cache, o, store;
-                return regeneratorRuntime.wrap(function _callee2$(_context2) {
-                    while (1) {
-                        switch (_context2.prev = _context2.next) {
-                            case 0:
-                                if (!config.storage) {
-                                    _context2.next = 5;
-                                    break;
-                                }
+        key: 'store',
+        value: function store(config) {
+            var _this2 = this;
 
-                                _context2.next = 3;
-                                return this.syncStorage(config.name);
-
-                            case 3:
-                                cache = _context2.sent;
-
-                                if ((0, _util.isObject)(cache)) {
-                                    for (o in config.data) {
-                                        if (cache[o]) config.data[o] = cache[o];
-                                    }
-                                }
-
-                            case 5:
-                                store = new _Store2.default(config, this);
-
-                                Object.defineProperty(this, config.name, {
-                                    value: store,
-                                    writable: false,
-                                    configurable: true,
-                                    enumerable: true
-                                });
-                                Object.preventExtensions(store);
-
-                            case 8:
-                            case 'end':
-                                return _context2.stop();
+            if (config.storage) {
+                return this.syncStorage(config.name).then(function (cache) {
+                    if ((0, _util.isObject)(cache)) {
+                        for (var o in config.data) {
+                            if (cache[o]) config.data[o] = cache[o];
                         }
                     }
-                }, _callee2, this);
-            }));
-
-            function register(_x2) {
-                return _ref2.apply(this, arguments);
+                    return createStore(config, _this2);
+                });
+            } else {
+                return Promise.resolve(createStore(config, this));
             }
+        }
+        /**
+         * 
+         * 
+         * @param {any|array} config 
+         * @returns 
+         * 
+         * @memberOf StoreManager
+         */
 
-            return register;
-        }()
+    }, {
+        key: 'register',
+        value: function register(config) {
+            var _this3 = this;
+
+            if ((0, _util.isArray)(config)) {
+                var c = config.pop();
+                if (c) {
+                    return this.store(c).then(function () {
+                        return _this3.register(config);
+                    });
+                } else {
+                    return Promise.resolve();
+                }
+            } else {
+                return this.store(c);
+            }
+        }
     }, {
         key: 'unregister',
         value: function unregister(name) {
@@ -762,6 +790,16 @@ var StoreManager = function (_EventEmitter) {
             store.removeAllListeners();
             delete this[name];
         }
+        /**
+         * 
+         * 
+         * @param {any} name 
+         * @param {any} value 
+         * @returns Promise
+         * 
+         * @memberOf StoreManager
+         */
+
     }, {
         key: 'syncStorage',
         value: function syncStorage(name, value) {
@@ -774,10 +812,10 @@ var StoreManager = function (_EventEmitter) {
     }, {
         key: 'flow',
         value: function flow(flowIn, flows) {
-            var _this2 = this;
+            var _this4 = this;
 
             flows.forEach(function (storeName) {
-                var store = _this2[storeName];
+                var store = _this4[storeName];
                 if (store.onFlow) {
                     store.onFlow(flowIn);
                 }
@@ -858,3 +896,4 @@ exports.isUndefined = _util.isUndefined;
 
 /***/ })
 /******/ ]);
+});

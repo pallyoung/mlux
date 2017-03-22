@@ -8,7 +8,10 @@ module.exports = {
     },
     output: {
         path: 'dist',
-        filename: '[name].js'
+        filename: '[name].js',
+        library: 'MLUX',
+        libraryTarget: 'umd',
+        umdNamedDefine: true
     },
     module: {
         rules: [

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>mlux demo</title>
+    <script src = '../dist/mlux.js'></script>
+</head>
+<body>
+    <div>
+        
+    </div>
+    <script>
+       var manager = MLUX.StoreManager;
+        manager.setStorageTool({
+           getter:function(name){
+            return Promise.resolve(JSON.parse(localStorage.getItem(name)||'{}'));
+           },
+           setter:function(name,value){
+            return Promise.resolve(localStorage.setItem(name,JSON.stringify(value)));
+           }
+       });
+       var stores = [
+           {
+               name:'test',
+               data:{
+                   value:''
+               },
+               storage:true
+           },
+           {
+               name:'test1',
+               data:{
+                   value:'1112'
+               },
+               storage:true
+           },
+       ]
+       manager.register(stores).then(function(){
+            console.log('store test:'+manager.test.value)
+            console.log('store test1:'+manager.test1.value)
+       })
+      
+       setTimeout(function(){
+           manager.test.value = ''+Date.now();
+           manager.test1.value = '222'+Date.now();
+       })
+       manager.addListener('change',function(){
+        console.log(arguments)
+       });
+    </script>
+</body>
+</html>
