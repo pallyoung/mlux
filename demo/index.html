@@ -40,15 +40,22 @@
        manager.load(stores).then(function(){
             console.log('store test:'+manager.test.value)
             console.log('store test1:'+manager.test1.value)
+            console.log('set'+Date.now())
+            manager.test.addListener('change',function(){
+                console.log(arguments)
+                console.log('change1'+Date.now())
+            });
+             manager.test.value = ''+Date.now();
+            manager.test1.value = '222'+Date.now();
+            
        })
       
-       setTimeout(function(){
-           manager.test.value = ''+Date.now();
-           manager.test1.value = '222'+Date.now();
-       })
+       
        manager.addListener('change',function(){
         console.log(arguments)
+         console.log('change'+Date.now())
        });
+
     </script>
 </body>
 </html>

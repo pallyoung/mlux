@@ -31,21 +31,21 @@ class Container {
     addListener(type, listener) {
         return {
             token: this.getVendor(type).addListener(listener),
-            type:type
+            type: type
         };
     }
     removeListener(subscription) {
-        if(!subscription){
+        if (!subscription) {
             return;
         }
         this.getVendor(subscription.type).removeListener(subscription.token);
     }
-    removeAllListeners(type){
-        if(type){
+    removeAllListeners(type) {
+        if (type) {
             delete this._vendors[type];
-        }else{
+        } else {
             this._vendors = {}
-        }   
+        }
     }
 
 }
@@ -54,20 +54,18 @@ export default class EventEmitter {
         this._container = new Container();
     }
     addListener(type, listener) {
-        return this._container.addListener(type,listener);
+        return this._container.addListener(type, listener);
     }
     removeListener(subscription) {
         this._container.removeListener(subscription);
     }
-    removeAllListeners(type){
+    removeAllListeners(type) {
         this._container.removeAllListeners(type)
     }
     emit(type, ...args) {
         var listeners = this._container.getVendor(type).listeners;
-        for(let l in listeners){
-            setTimeout(function(){
-                listeners[l](...args);
-            },0);        
+        for (let l in listeners) {
+            listeners[l](...args);
         }
     }
 }

@@ -278,7 +278,7 @@ var Event = _constants2.default.EVNET;
 function observerCallback(store) {
     store.notifyChange();
 }
-var DONT_ENMU_KEYS = ['_timeout', 'name', '_flow', 'onflow', '_storage', '_manager', '_pump', 'notifyChange', 'copy', 'assign', 'pump', 'flowTo', 'onFlow', '_extends', 'onWillUnload', '_onwillunload', '_clearTimeout', '_timeoutHandles'];
+var DONT_ENMU_KEYS = ['_timeout', 'name', '_flow', 'onflow', '_storage', '_manager', '_pump', 'notifyChange', 'copy', 'assign', 'pump', 'flowTo', 'onFlow', '_extends', 'onWillUnload', '_onwillunload', '_clearTimeout', '_timeoutHandles', 'set', 'get'];
 
 var Store = function (_EventEmitter) {
     _inherits(Store, _EventEmitter);
@@ -323,18 +323,12 @@ var Store = function (_EventEmitter) {
             if (!(0, _util.isObject)(source)) {
                 return this;
             }
-            Object.keys(source).forEach(function (key) {
-                if (DONT_ENMU_KEYS.indexOf(key)) {
-                    return;
-                }
-                var oldValue = _this2[key];
-                var newValue = source[key];
-                if (!oldValue || oldValue === newValue || !(0, _util.isSameType)(newValue, oldValue)) {
-                    return;
-                }
-                _this2[key] = newValue;
+            (0, _util.forEach)(source, DONT_ENMU_KEYS, function (v, key) {
+                _this2.set(key, v);
             });
         }
+        //复制store中的值
+
     }, {
         key: 'copy',
         value: function copy() {
@@ -343,6 +337,17 @@ var Store = function (_EventEmitter) {
                 dst[key] = v;
             });
             return dst;
+        }
+        //遍历
+
+    }, {
+        key: 'forEach',
+        value: function forEach(callback) {
+            var _this3 = this;
+
+            (0, _util.forEach)(this, DONT_ENMU_KEYS, function (v, key) {
+                callback(v, key, _this3);
+            });
         }
     }, {
         key: 'assign',
@@ -356,46 +361,46 @@ var Store = function (_EventEmitter) {
             }
             return this;
         }
+        //从一个特定的地方获取值
+
     }, {
         key: 'pump',
         value: function pump() {
-            var _this3 = this;
+            var _this4 = this;
 
             if ((0, _util.isFunction)(this._pump)) {
                 return this._pump.apply(this, arguments).then(function (data) {
-                    _this3.assign(data);
-                    return _this3;
+                    _this4.assign(data);
+                    return _this4;
                 });
             } else {
-                return new Promise(function (res, rej) {
-                    res(this);
-                });
+                return (0, _util.promiseNoop)();
             }
         }
     }, {
         key: 'notifyChange',
         value: function notifyChange() {
-            var _this4 = this;
+            var _this5 = this;
 
             clearTimeout(this._timeoutHandles.change);
             this._timeoutHandles.change = setTimeout(function () {
-                if (_this4._storage) {
-                    _this4._manager.syncStorage(_this4.name, _this4.copy());
+                _this5.emit(Event.CHANGE);
+                _this5._manager.emit(Event.CHANGE, _this5.name);
+                if (_this5._storage) {
+                    _this5._manager.syncStorage(_this5.name, _this5.copy());
                 }
-                _this4.flowTo();
-                _this4.emit(Event.CHANGE);
-                _this4._manager.emit(Event.CHANGE, _this4.name);
+                _this5.flowTo();
             }, 10);
         }
     }, {
         key: 'flowTo',
         value: function flowTo() {
-            var _this5 = this;
+            var _this6 = this;
 
             if ((0, _util.isArray)(this._flow)) {
                 this._flow.forEach(function (storeName) {
-                    var store = _this5._manager[storeName];
-                    store.onFlow(_this5);
+                    var store = _this6._manager[storeName];
+                    store.onFlow(_this6);
                 });
             }
         }
@@ -412,12 +417,17 @@ var Store = function (_EventEmitter) {
             clearTimeout(this._timeoutHandles.change);
             this._onwillunload();
         }
-        // setter(data) {
-        //     if (this.storage) {
-        //         this.manager.syncStorage(this.name, data);
-        //     }
-        //     this.data = data;
-        // }
+    }, {
+        key: 'set',
+        value: function set(key, value) {
+            var oldValue = this[key];
+            if (!oldValue || oldValue === value || !(0, _util.isSameType)(value, oldValue)) {
+                return false;
+            }
+            this[key] = value;
+            this.notifyChange();
+            return true;
+        }
         /**
          * 
          * 
@@ -429,10 +439,12 @@ var Store = function (_EventEmitter) {
          * 
          * 
          */
-        // getter() {
-        //     return this.data;
-        // }
 
+    }, {
+        key: 'get',
+        value: function get(key) {
+            return this[key];
+        }
     }]);
 
     return Store;
@@ -553,20 +565,14 @@ var EventEmitter = function () {
     }, {
         key: 'emit',
         value: function emit(type) {
+            var listeners = this._container.getVendor(type).listeners;
+
             for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
                 args[_key - 1] = arguments[_key];
             }
 
-            var listeners = this._container.getVendor(type).listeners;
-
-            var _loop = function _loop(l) {
-                setTimeout(function () {
-                    listeners[l].apply(listeners, args);
-                }, 0);
-            };
-
             for (var l in listeners) {
-                _loop(l);
+                listeners[l].apply(listeners, args);
             }
         }
     }]);
@@ -616,10 +622,7 @@ function observerProp(object, prop, callback) {
             if (!(0, _util.isSameType)(value, _value)) {
                 throw new Error('trying to change the type of store property ' + object.name + ' ' + prop + ' :you can not  change the type of store property');
             }
-            if (!(0, _equlas2.default)(_value, value)) {
-                _value = value;
-                callback(object);
-            }
+            _value !== value && (_value = value, callback(object));
         },
         configurable: false
     });

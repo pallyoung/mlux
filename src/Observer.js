@@ -23,10 +23,7 @@ function observerProp(object, prop, callback) {
                 throw new Error('trying to change the type of store property '+object.name+' '
                 +prop +' :you can not  change the type of store property');
             }
-            if(!equlas(_value,value)){
-                _value = value;
-                callback(object);
-            }
+            _value!==value&&(_value = value,callback(object));
         },
         configurable:false
     });
