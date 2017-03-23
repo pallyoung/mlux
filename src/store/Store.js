@@ -43,7 +43,9 @@ var DONT_ENMU_KEYS = [
     'onWillUnload',
     '_onwillunload',
     '_clearTimeout',
-    '_timeoutHandles'
+    '_timeoutHandles',
+    'set',
+    'get'
 ];
 export default class Store extends EventEmitter {
     constructor(config, storeManager) {
@@ -60,14 +62,14 @@ export default class Store extends EventEmitter {
         //是否同步到本地
         this._storage = config.storage || false;
         this._manager = storeManager;
-        
+
         this._timeoutHandles = {
             change: undefined
         }
-        forEach(this,function(v,key,self){
+        forEach(this, function (v, key, self) {
             freezeProperty(self, key);
         });
-        
+
         for (let o in config.model) {
             this[o] = config.model[o];
         }
@@ -79,32 +81,31 @@ export default class Store extends EventEmitter {
         if (!isObject(source)) {
             return this;
         }
-        Object.keys(source).forEach((key) => {
-            if (DONT_ENMU_KEYS.indexOf(key)) {
-                return;
-            }
-            let oldValue = this[key];
-            let newValue = source[key];
-            if (!oldValue || oldValue === newValue || !isSameType(newValue, oldValue)) {
-                return;
-            }
-            this[key] = newValue;
+        forEach(source, DONT_ENMU_KEYS, (v, key) => {
+            this.set(key,v);
         });
     }
+    //复制store中的值
     copy() {
         var dst = {}
-        forEach(this,DONT_ENMU_KEYS,function(v,key){
+        forEach(this, DONT_ENMU_KEYS, function (v, key) {
             dst[key] = v;
         });
         return dst;
     }
-
+    //遍历
+    forEach(callback) {
+        forEach(this, DONT_ENMU_KEYS, (v, key) => {
+            callback(v, key, this);
+        })
+    }
     assign(...args) {
         for (var i = 0, l = args.length; i < l; i++) {
             this._extends(args[i]);
         }
         return this;
     }
+    //从一个特定的地方获取值
     pump(...args) {
         if (isFunction(this._pump)) {
             return this._pump(...args).then((data) => {
@@ -112,9 +113,7 @@ export default class Store extends EventEmitter {
                 return this;
             })
         } else {
-            return new Promise(function (res, rej) {
-                res(this);
-            })
+            return promiseNoop();
         }
     }
     notifyChange() {
@@ -146,12 +145,15 @@ export default class Store extends EventEmitter {
         clearTimeout(this._timeoutHandles.change);
         this._onwillunload();
     }
-    // setter(data) {
-    //     if (this.storage) {
-    //         this.manager.syncStorage(this.name, data);
-    //     }
-    //     this.data = data;
-    // }
+    set(key, value) {
+        let oldValue = this[key];
+        if (!oldValue || oldValue === value || !isSameType(value, oldValue)) {
+            return false;
+        }
+        this[key] = value;
+        this.notifyChange();
+        return true;
+    }
     /**
      * 
      * 
@@ -163,7 +165,7 @@ export default class Store extends EventEmitter {
      * 
      * 
      */
-    // getter() {
-    //     return this.data;
-    // }
+    get(key) {
+        return this[key];
+    }
 }
