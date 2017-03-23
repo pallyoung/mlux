@@ -33,7 +33,8 @@
   ],
   "files":[
     "dist/",
-   " package.json"
+   " package.json",
+   "README.md"
   ],
   "license": "ISC",
   "main": "dist/mlux.js",
