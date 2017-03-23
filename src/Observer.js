@@ -1,6 +1,6 @@
 'use strict'
 import equlas from './equlas';
-import {isSameType,isArray,isObject} from './util';
+import {isSameType,isArray,isObject,defineProperty} from './util';
 function observer(obj, callback) {
     for (var o in obj) {
         observerProp(obj,o,callback);
@@ -8,7 +8,7 @@ function observer(obj, callback) {
 }
 function observerProp(object, prop, callback) {
     var _value = object[prop];
-    Object.defineProperty(object, prop, {
+    defineProperty(object, prop, {
         get: function () {
             if(isArray(_value)){
                 return _value.slice();

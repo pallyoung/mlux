@@ -15,7 +15,7 @@ flux规范的一种实现。
 * 兼容react和react-native。
 * 提供数据结构不可变得store来管理数据。
 * 可以通过事件监听store变化。
-* 通过Binder组件可以快速构建和store双向绑定的组件。
+* 通过Binder组件使组件自动监听store，在store数据改变的时候更新view。
 
 ## Demo 
 
@@ -76,16 +76,15 @@ eventEmitter.emit(type:String,...args:...Object);
 
 ### StoreManager
   
-  * [register](#storemanagerregister):向StoreManager注册一个Store。
-  * [unregister](#storemanagerunregister):移除StoreManager中注册的Store。
-  * [mapRegister](#storemanagermapregister):注册Store。
+  * [load](#storemanagerload):向StoreManager注册Store。
+  * [unload](#storemanagerunload):移除StoreManager中注册的Store。
   * [setStorageTool](#storemanagersetstoragetool):设置StorageManager的持久化工具。
 
-#### StoreManager.register
+#### StoreManager.load
 ```javascript
 //注册store
 // @returnValue:Promise
-StoreManager.register(storeConfig);
+StoreManager.load(storeConfigs);
 ```
 ##### StoreConfig
 
@@ -96,22 +95,17 @@ StoreManager.register(storeConfig);
 * __storage__ *(Boolean)* - 表示该store是否要数据持久化。如果设置了true，StoreManager讲通过setStorageTool方法设置的持久化工具来持久化该store。可选
 * __pump__ *(()=>Promise)* - 为store设置数据源。可以是http请求或者其他的来源。返回值必须是Promise对象。可选。
 * __flow__ *(StringArray)* - 配置当store数据发生改变时，需要通知到哪几个store知道。可选。
-* __onFlow__ *((fromStore:Store)=>Promise)* - 配置当另外的是store数据发生改变且该store在另外的store的flow清单中，就会通过该方法来接受。
+* __onflow__ *((fromStore:Store)=>Promise)* - 配置当另外的是store数据发生改变且该store在另外的store的flow清单中，就会通过该方法来接受。
+* __onwillunload__ *(void()=>) - store卸载的时候触发。
+* __onload__ *(void()=>) - store首次被StoreManager加载的时候触发。
 
-#### StoreManager.unregister
+#### StoreManager.unload
 
 ```javascript
-StoreManager.unregister(storeName);
+StoreManager.unload(storeName);
 ```
 移除StoreManager中注册的Store。通过是移除该store中所有的监听事件。
 
-#### StoreManager.mapRegister
-
-```javascript
-// @returnValue:Promise
-StoreManager.mapRegister(storeConfigArray);
-```
-通过一个StoreConfig数组批量注册store;
 
 #### StoreManager.setStorageTool
 

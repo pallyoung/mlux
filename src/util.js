@@ -1,8 +1,6 @@
 'use strict'
-function type(source) {
-    var typeString = Object.prototype.toString.call(source);
-    return typeString.slice(8, -1).toLowerCase();
-}
+import TypeDetector from 'js-type-detector';
+var type = TypeDetector.is;
 function isString(source) {
     return type(source) === 'string';
 }
@@ -25,7 +23,7 @@ function isFunction(source) {
     return typeof source === 'function';
 }
 function isSameType(s1, s2) {
-    return Object.prototype.toString.call(s1) === Object.prototype.toString.call(s2);
+    return type(s1) === type(s2);
 }
 function isNull(source) {
     return source != null;
@@ -48,6 +46,77 @@ function isEmpty(source) {
 function isNative(fn) {
     return (/\[native code\]/.test(fn));
 }
+
+function forEach(source, filter,callback) {
+    var keys = [];
+    if(isFunction(filter)){
+        callback = filter;
+        filter = [];
+    }
+    if(!isFunction(callback)){
+        return;
+    }
+    if (!isArray(filter)) {
+        throw new Error('filter can only be Array');
+    }
+    if (isArray(source) || isObject(source)) {
+        keys = Object.keys(source);
+        keys.forEach(function (v) {
+            //不需要过滤
+            if(filter.indexOf(v)<0){
+                callback(source[v],v,source);
+            }
+        })
+    }
+}
+function noop() {
+
+}
+function promiseNoop() {
+    return Promise.resolve();
+}
+/**
+ * 
+ * 
+ */
+/**
+ * 
+ * 
+ * @param {any} object 
+ * @param {any} property 
+ * @param {any} config 
+ * @returns 
+ */
+function defineProperty(object, property, config) {
+    return Object.defineProperty(object, property, config);
+}
+function freezeProperty(object, property){
+     defineProperty(object, property, {
+        value: object[property],
+        writable: false,
+        enumerable: false,
+        configurable: false
+    });
+}
+function sealProperty(object, property) {
+    defineProperty(object, property, {
+        value: object[property],
+        writable: true,
+        enumerable: false,
+        configurable: false
+    });
+}
+function immutableProperty(object, property){
+    defineProperty(object, property, {
+        value: object[property],
+        writable: false,
+        enumerable: true,
+        configurable: true
+    });
+}
+function preventExtensions(object){
+    return Object.preventExtensions(object);
+}
 export {
     type,
     isObject,
@@ -60,5 +129,13 @@ export {
     isNumber,
     isBoolean,
     isUndefined,
-    isNative
+    isNative,
+    noop,
+    promiseNoop,
+    defineProperty,
+    sealProperty,
+    freezeProperty,
+    immutableProperty,
+    preventExtensions,
+    forEach
 }

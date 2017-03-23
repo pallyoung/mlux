@@ -6,7 +6,7 @@ export default {
         CHANGE:'change',//store change 
         REGISTER:'register',//store register
         STORAGE:'storage',//store storage
-        STORAGE_ERROR:'storageError',//storage error
+        STORAGE_ERROR:'storagerrror',//storage error
 
     }
 }

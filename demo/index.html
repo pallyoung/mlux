@@ -12,7 +12,7 @@
         
     </div>
     <script>
-       var manager = MLUX.StoreManager;
+       var manager = Mlux.StoreManager;
         manager.setStorageTool({
            getter:function(name){
             return Promise.resolve(JSON.parse(localStorage.getItem(name)||'{}'));
@@ -37,7 +37,7 @@
                storage:true
            },
        ]
-       manager.register(stores).then(function(){
+       manager.load(stores).then(function(){
             console.log('store test:'+manager.test.value)
             console.log('store test1:'+manager.test1.value)
        })

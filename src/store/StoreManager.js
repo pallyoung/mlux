@@ -1,36 +1,30 @@
 'use strict'
 import EventEmitter from './../EventEmitter';
 import Store from './Store';
-import emptyMethod from './../emptyMethod';
 import equlas from './../equlas';
 import observer from './../Observer';
 import {
     isObject,
     isArray,
     isFunction,
-    isSameType
+    isSameType,
+    promiseNoop,
+    sealProperty,
+    forEach,
+    freezeProperty,
+    immutableProperty,
+    preventExtensions
 } from './../util';
 
 
 
-function sealProperty(object, property) {
-    Object.defineProperty(object, property, {
-        value: object[property],
-        writable: true,
-        enumerable: false,
-        configurable: false
-    });
-}
+
 
 function createStore(config, manager) {
     var store = new Store(config, manager);
-    Object.defineProperty(manager, config.name, {
-        value: store,
-        writable: false,
-        configurable: true,
-        enumerable: true
-    });
-    Object.preventExtensions(store);
+    manager[config.name] = store;
+    immutableProperty(manager, config.name);
+    preventExtensions(store);
     return store;
 }
 
@@ -38,12 +32,12 @@ function createStore(config, manager) {
 class StoreManager extends EventEmitter {
     constructor() {
         super();
-        this.storageTool = {
-            setter: emptyMethod,
-            getter: emptyMethod
-        }
         for (let o in this) {
-            sealProperty(this, o)
+            freezeProperty(this, o)
+        }
+        this.storageTool = {
+            setter: promiseNoop,
+            getter: promiseNoop
         }
     }
     setStorageTool(tool) {
@@ -53,18 +47,13 @@ class StoreManager extends EventEmitter {
          */
         this.storageTool = tool;
     }
-    notifyChange(storeName) {
-        var store = this[storeName];
-        store.notifyChange();
-        this.emit('change', storeName);
-    }
     store(config) {
         if (config.storage) {
             return this.syncStorage(config.name).then((cache) => {
                 if (isObject(cache)) {
-                    for (let o in config.data) {
+                    for (let o in config.model) {
                         if (cache[o])
-                            config.data[o] = cache[o];
+                            config.model[o] = cache[o];
                     }
                 }
                 return createStore(config, this);
@@ -81,24 +70,25 @@ class StoreManager extends EventEmitter {
      * 
      * @memberOf StoreManager
      */
-    register(config) {
+    load(config) {
         if (isArray(config)) {
             var c = config.pop();
-            if (c ) {
-                return this.store(c).then(()=>{
-                    return this.register(config);
+            if (c) {
+                return this.store(c).then(() => {
+                    return this.load(config);
                 })
-            }else{
+            } else {
                 return Promise.resolve();
             }
-        }else{
+        } else {
             return this.store(c);
         }
 
 
     }
-    unregister(name) {
+    unload(name) {
         var store = this[name];
+        store.onWillUnload();
         //移除所有监听事件
         store.removeAllListeners();
         delete this[name];

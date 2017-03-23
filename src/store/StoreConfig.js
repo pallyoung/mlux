@@ -6,6 +6,8 @@ export default class Config{
         this.storage;
         this.pump;
         this.flow;
-        this.onFlow;
+        this.onflow;
+        this.onwillunload;
+        this.onload;
     }
 }

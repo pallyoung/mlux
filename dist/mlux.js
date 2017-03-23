@@ -2,11 +2,11 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define("MLUX", [], factory);
+		define("Mlux", [], factory);
 	else if(typeof exports === 'object')
-		exports["MLUX"] = factory();
+		exports["Mlux"] = factory();
 	else
-		root["MLUX"] = factory();
+		root["Mlux"] = factory();
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 8);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -86,13 +86,17 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.forEach = exports.preventExtensions = exports.immutableProperty = exports.freezeProperty = exports.sealProperty = exports.defineProperty = exports.promiseNoop = exports.noop = exports.isNative = exports.isUndefined = exports.isBoolean = exports.isNumber = exports.isString = exports.isNull = exports.isEmpty = exports.isSameType = exports.isFunction = exports.isArray = exports.isObject = exports.type = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-function type(source) {
-    var typeString = Object.prototype.toString.call(source);
-    return typeString.slice(8, -1).toLowerCase();
-}
+var _jsTypeDetector = __webpack_require__(7);
+
+var _jsTypeDetector2 = _interopRequireDefault(_jsTypeDetector);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var type = _jsTypeDetector2.default.is;
 function isString(source) {
     return type(source) === 'string';
 }
@@ -115,7 +119,7 @@ function isFunction(source) {
     return typeof source === 'function';
 }
 function isSameType(s1, s2) {
-    return Object.prototype.toString.call(s1) === Object.prototype.toString.call(s2);
+    return type(s1) === type(s2);
 }
 function isNull(source) {
     return source != null;
@@ -139,6 +143,75 @@ function isNative(fn) {
     return (/\[native code\]/.test(fn)
     );
 }
+
+function forEach(source, filter, callback) {
+    var keys = [];
+    if (isFunction(filter)) {
+        callback = filter;
+        filter = [];
+    }
+    if (!isFunction(callback)) {
+        return;
+    }
+    if (!isArray(filter)) {
+        throw new Error('filter can only be Array');
+    }
+    if (isArray(source) || isObject(source)) {
+        keys = Object.keys(source);
+        keys.forEach(function (v) {
+            //不需要过滤
+            if (filter.indexOf(v) < 0) {
+                callback(source[v], v, source);
+            }
+        });
+    }
+}
+function noop() {}
+function promiseNoop() {
+    return Promise.resolve();
+}
+/**
+ * 
+ * 
+ */
+/**
+ * 
+ * 
+ * @param {any} object 
+ * @param {any} property 
+ * @param {any} config 
+ * @returns 
+ */
+function defineProperty(object, property, config) {
+    return Object.defineProperty(object, property, config);
+}
+function freezeProperty(object, property) {
+    defineProperty(object, property, {
+        value: object[property],
+        writable: false,
+        enumerable: false,
+        configurable: false
+    });
+}
+function sealProperty(object, property) {
+    defineProperty(object, property, {
+        value: object[property],
+        writable: true,
+        enumerable: false,
+        configurable: false
+    });
+}
+function immutableProperty(object, property) {
+    defineProperty(object, property, {
+        value: object[property],
+        writable: false,
+        enumerable: true,
+        configurable: true
+    });
+}
+function preventExtensions(object) {
+    return Object.preventExtensions(object);
+}
 exports.type = type;
 exports.isObject = isObject;
 exports.isArray = isArray;
@@ -151,6 +224,14 @@ exports.isNumber = isNumber;
 exports.isBoolean = isBoolean;
 exports.isUndefined = isUndefined;
 exports.isNative = isNative;
+exports.noop = noop;
+exports.promiseNoop = promiseNoop;
+exports.defineProperty = defineProperty;
+exports.sealProperty = sealProperty;
+exports.freezeProperty = freezeProperty;
+exports.immutableProperty = immutableProperty;
+exports.preventExtensions = preventExtensions;
+exports.forEach = forEach;
 
 /***/ }),
 /* 1 */
@@ -169,11 +250,11 @@ var _EventEmitter2 = __webpack_require__(2);
 
 var _EventEmitter3 = _interopRequireDefault(_EventEmitter2);
 
-var _emptyMethod = __webpack_require__(4);
-
-var _emptyMethod2 = _interopRequireDefault(_emptyMethod);
-
 var _util = __webpack_require__(0);
+
+var _constants = __webpack_require__(8);
+
+var _constants2 = _interopRequireDefault(_constants);
 
 var _Observer = __webpack_require__(3);
 
@@ -187,18 +268,17 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var Event = _constants2.default.EVNET;
+
+
 /**
  * todo
  */
-var EVENT_CHNAGE = 'change'; //数据发生改变
-var EVENT_ERROR = 'error'; //操作失败
-var EVENT_STORAGE = 'storage'; //存储
-var EVENT_GET = 'get'; //获取
-var EVENT_SET = 'get'; //获取
 
 function observerCallback(store) {
     store.notifyChange();
 }
+var DONT_ENMU_KEYS = ['_timeout', 'name', '_flow', 'onflow', '_storage', '_manager', '_pump', 'notifyChange', 'copy', 'assign', 'pump', 'flowTo', 'onFlow', '_extends', 'onWillUnload', '_onwillunload', '_clearTimeout', '_timeoutHandles'];
 
 var Store = function (_EventEmitter) {
     _inherits(Store, _EventEmitter);
@@ -212,69 +292,69 @@ var Store = function (_EventEmitter) {
             throw new Error('initialize ' + config.name + ' error, model can noly be an object');
         }
         _this.name = config.name;
-        _this._flow = config.flow;
-        _this._onFlow = config.onFlow;
+        _this._flow = config.flow || [];
+        _this._onflow = config.onflow || _util.noop;
         _this._pump = config.pump;
+        _this._onwillunload = config.onwillunload || _util.noop;
+        _this._onload = config.onload || _util.noop;
         //是否同步到本地
-        _this._storage = config.storage;
+        _this._storage = config.storage || false;
         _this._manager = storeManager;
-        _this._timeout;
 
-        for (var o in _this) {
-            Object.defineProperty(_this, o, {
-                value: _this[o],
-                writable: false,
-                enumerable: false,
-                configurable: false
-            });
-        }
-        Object.defineProperty(_this, '_timeout', {
-            value: undefined,
-            writable: true,
-            enumerable: false,
-            configurable: false
+        _this._timeoutHandles = {
+            change: undefined
+        };
+        (0, _util.forEach)(_this, function (v, key, self) {
+            (0, _util.freezeProperty)(self, key);
         });
-        for (var _o in config.model) {
-            _this[_o] = config.model[_o];
+
+        for (var o in config.model) {
+            _this[o] = config.model[o];
         }
         (0, _Observer2.default)(_this, observerCallback);
         return _this;
     }
 
     _createClass(Store, [{
-        key: 'notifyChange',
-        value: function notifyChange() {
+        key: '_extends',
+        value: function _extends(source) {
             var _this2 = this;
 
-            clearTimeout(this._timeout);
-            this._timeout = setTimeout(function () {
-                if (_this2._storage) {
-                    _this2._manager.syncStorage(_this2.name, _this2.copy());
+            if (!(0, _util.isObject)(source)) {
+                return this;
+            }
+            Object.keys(source).forEach(function (key) {
+                if (DONT_ENMU_KEYS.indexOf(key)) {
+                    return;
                 }
-                _this2.flowTo();
-                _this2.emit(EVENT_CHNAGE);
-                _this2._manager.emit(EVENT_CHNAGE, _this2.name);
-            }, 10);
+                var oldValue = _this2[key];
+                var newValue = source[key];
+                if (!oldValue || oldValue === newValue || !(0, _util.isSameType)(newValue, oldValue)) {
+                    return;
+                }
+                _this2[key] = newValue;
+            });
         }
     }, {
         key: 'copy',
         value: function copy() {
             var dst = {};
-            for (var o in this) {
-                dst[o] = this[o];
-            }
+            (0, _util.forEach)(this, DONT_ENMU_KEYS, function (v, key) {
+                dst[key] = v;
+            });
             return dst;
         }
     }, {
         key: 'assign',
-        value: function assign(data) {
-            for (var o in data) {
-                var oldValue = this[o];
-                var newValue = data[o];
-                if (oldValue && (0, _util.isSameType)(oldValue, newValue)) {
-                    this[o] = newValue;
-                }
+        value: function assign() {
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                args[_key] = arguments[_key];
             }
+
+            for (var i = 0, l = args.length; i < l; i++) {
+                this._extends(args[i]);
+            }
+            return this;
         }
     }, {
         key: 'pump',
@@ -293,23 +373,44 @@ var Store = function (_EventEmitter) {
             }
         }
     }, {
+        key: 'notifyChange',
+        value: function notifyChange() {
+            var _this4 = this;
+
+            clearTimeout(this._timeoutHandles.change);
+            this._timeoutHandles.change = setTimeout(function () {
+                if (_this4._storage) {
+                    _this4._manager.syncStorage(_this4.name, _this4.copy());
+                }
+                _this4.flowTo();
+                _this4.emit(Event.CHANGE);
+                _this4._manager.emit(Event.CHANGE, _this4.name);
+            }, 10);
+        }
+    }, {
         key: 'flowTo',
         value: function flowTo() {
-            var _this4 = this;
+            var _this5 = this;
 
             if ((0, _util.isArray)(this._flow)) {
                 this._flow.forEach(function (storeName) {
-                    var store = _this4._manager[storeName];
-                    store.onFlow(_this4);
+                    var store = _this5._manager[storeName];
+                    store.onFlow(_this5);
                 });
             }
         }
     }, {
         key: 'onFlow',
         value: function onFlow(store) {
-            if ((0, _util.isFunction)(this._onFlow)) {
+            if ((0, _util.isFunction)(this._onflow)) {
                 this._onFlow(store);
             }
+        }
+    }, {
+        key: 'onWillUnload',
+        value: function onWillUnload() {
+            clearTimeout(this._timeoutHandles.change);
+            this._onwillunload();
         }
         // setter(data) {
         //     if (this.storage) {
@@ -486,7 +587,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _equlas = __webpack_require__(5);
+var _equlas = __webpack_require__(4);
 
 var _equlas2 = _interopRequireDefault(_equlas);
 
@@ -501,7 +602,7 @@ function observer(obj, callback) {
 }
 function observerProp(object, prop, callback) {
     var _value = object[prop];
-    Object.defineProperty(object, prop, {
+    (0, _util.defineProperty)(object, prop, {
         get: function get() {
             if ((0, _util.isArray)(_value)) {
                 return _value.slice();
@@ -527,25 +628,6 @@ exports.default = observer;
 
 /***/ }),
 /* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-exports.default = function () {
-    return new Promise(promise);
-};
-
-function promise(res, rej) {
-    res();
-}
-
-/***/ }),
-/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -593,7 +675,7 @@ function equlas(s1, s2) {
 }
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -678,7 +760,7 @@ if (!(0, _util.isNative)(Object.assign)) {
 }
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -698,11 +780,7 @@ var _Store = __webpack_require__(1);
 
 var _Store2 = _interopRequireDefault(_Store);
 
-var _emptyMethod = __webpack_require__(4);
-
-var _emptyMethod2 = _interopRequireDefault(_emptyMethod);
-
-var _equlas = __webpack_require__(5);
+var _equlas = __webpack_require__(4);
 
 var _equlas2 = _interopRequireDefault(_equlas);
 
@@ -720,24 +798,11 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function sealProperty(object, property) {
-    Object.defineProperty(object, property, {
-        value: object[property],
-        writable: true,
-        enumerable: false,
-        configurable: false
-    });
-}
-
 function createStore(config, manager) {
     var store = new _Store2.default(config, manager);
-    Object.defineProperty(manager, config.name, {
-        value: store,
-        writable: false,
-        configurable: true,
-        enumerable: true
-    });
-    Object.preventExtensions(store);
+    manager[config.name] = store;
+    (0, _util.immutableProperty)(manager, config.name);
+    (0, _util.preventExtensions)(store);
     return store;
 }
 
@@ -751,13 +816,13 @@ var StoreManager = function (_EventEmitter) {
 
         var _this = _possibleConstructorReturn(this, (StoreManager.__proto__ || Object.getPrototypeOf(StoreManager)).call(this));
 
-        _this.storageTool = {
-            setter: _emptyMethod2.default,
-            getter: _emptyMethod2.default
-        };
         for (var o in _this) {
-            sealProperty(_this, o);
+            (0, _util.freezeProperty)(_this, o);
         }
+        _this.storageTool = {
+            setter: _util.promiseNoop,
+            getter: _util.promiseNoop
+        };
         return _this;
     }
 
@@ -771,13 +836,6 @@ var StoreManager = function (_EventEmitter) {
             this.storageTool = tool;
         }
     }, {
-        key: 'notifyChange',
-        value: function notifyChange(storeName) {
-            var store = this[storeName];
-            store.notifyChange();
-            this.emit('change', storeName);
-        }
-    }, {
         key: 'store',
         value: function store(config) {
             var _this2 = this;
@@ -785,8 +843,8 @@ var StoreManager = function (_EventEmitter) {
             if (config.storage) {
                 return this.syncStorage(config.name).then(function (cache) {
                     if ((0, _util.isObject)(cache)) {
-                        for (var o in config.data) {
-                            if (cache[o]) config.data[o] = cache[o];
+                        for (var o in config.model) {
+                            if (cache[o]) config.model[o] = cache[o];
                         }
                     }
                     return createStore(config, _this2);
@@ -805,15 +863,15 @@ var StoreManager = function (_EventEmitter) {
          */
 
     }, {
-        key: 'register',
-        value: function register(config) {
+        key: 'load',
+        value: function load(config) {
             var _this3 = this;
 
             if ((0, _util.isArray)(config)) {
                 var c = config.pop();
                 if (c) {
                     return this.store(c).then(function () {
-                        return _this3.register(config);
+                        return _this3.load(config);
                     });
                 } else {
                     return Promise.resolve();
@@ -823,9 +881,10 @@ var StoreManager = function (_EventEmitter) {
             }
         }
     }, {
-        key: 'unregister',
-        value: function unregister(name) {
+        key: 'unload',
+        value: function unload(name) {
             var store = this[name];
+            store.onWillUnload();
             //移除所有监听事件
             store.removeAllListeners();
             delete this[name];
@@ -870,7 +929,219 @@ var manager = new StoreManager();
 exports.default = manager;
 
 /***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+(function (factory) {
+    ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory() :  true ? !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
+				__WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : window.TypeDetector = factory();
+})(function factory() {
+    'use strict';
+
+    var OPToString = Object.prototype.toString;
+    var hasDontEnumBug = !{
+        'toString': null
+    }.propertyIsEnumerable('toString');
+    var hasProtoEnumBug = function () {}.propertyIsEnumerable('prototype');
+    var dontEnums = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'];
+    var dontEnumsLength = dontEnums.length;
+    var keys = Object.keys || function (object) {
+        var theKeys = [];
+        var skipProto = hasProtoEnumBug && typeof object === 'function';
+        if (typeof object === 'string' || object && object.callee) {
+            for (var i = 0; i < object.length; ++i) {
+                theKeys.push(String(i));
+            }
+        } else {
+            for (var name in object) {
+                if (!(skipProto && name === 'prototype') && ohasOwn.call(object, name)) {
+                    theKeys.push(String(name));
+                }
+            }
+        }
+
+        if (hasDontEnumBug) {
+            var ctor = object.constructor,
+                skipConstructor = ctor && ctor.prototype === object;
+            for (var j = 0; j < dontEnumsLength; j++) {
+                var dontEnum = dontEnums[j];
+                if (!(skipConstructor && dontEnum === 'constructor') && ohasOwn.call(object, dontEnum)) {
+                    theKeys.push(dontEnum);
+                }
+            }
+        }
+        return theKeys;
+    };
+    var testFunctionName = /function\s+(\w+)\s*\(/;
+
+    function is(object) {
+        var type = OPToString.call(object).slice(8, -1);
+        if (type !== 'Object') {
+            return type;
+        } else if (testFunctionName.test(object.constructor.toString())) {
+            type = RegExp.$1;
+            return type;
+        }
+        return type;
+    }
+    var isArray = Array.isArray || function (value) {
+        return OPToString.call(value) === '[object Array]';
+    };
+    function isEmptyArray(value) {
+        return isArray(value) && value.length <= 0;
+    }
+
+    function isNative(fn) {
+        return (/\[native code\]/.test(fn)
+        );
+    }
+
+    function isUndefined(value) {
+        return value === void 0;
+    }
+
+    function isNull(value) {
+        return value === null;
+    }
+    function isNumber(value) {
+        return typeof value === 'number';
+    }
+    function isZero(value) {
+        return 0 === value;
+    }
+    function isNegative(value) {
+        return isNumber(value) && value >>> 0 !== value;
+    }
+    function isBoolean(value) {
+        return typeof value === 'boolean';
+    }
+    /**
+     * @description 是否对象
+     * 
+     * @param {any} value 
+     * @returns 
+     */
+    function isObject(value) {
+        return (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object';
+    }
+    /**
+     * @description 对象实例中是否含有可枚举的值（例如{}）
+     * 
+     * @param {any} value 
+     * @returns 
+     */
+    function hasEnumerableProperty(value) {
+        return is(value) === 'Object' && keys(value).length <= 0;
+    }
+    /**
+     * @description 是否字符串
+     * 
+     * @param {any} value 
+     * @returns {boolean}
+     */
+    function isString(value) {
+        return typeof value === 'string';
+    }
+    var testEmptyString = /^[\s\uFEFF\xA0]*&/;
+    /**
+     * @description 是否空字符串 '' ' '都被认为是空字符串
+     * 
+     * @param {any} value 
+     * @returns {boolean}
+     */
+    function isEmptyString(value) {
+        return isString(value) && testEmptyString.test(value);
+    }
+    /**
+     * @description 是否function类型
+     * 
+     * @param {any} value 
+     * @returns {boolean}
+     */
+    function isFunction(value) {
+        return OPToString.call(value) === '[object Function]';
+    }
+
+    /**
+     * @description 返回是否空值 空数组 对象中是否含有可枚举的值（例如{}） 空字符都认为是空对象
+     * 
+     * @param {any} value 
+     * @returns {boolean}
+     */
+    function isEmptyValue(value) {
+        return isNull(value) || isUndefined(value) || isEmptyString(value) || isEmptyArray(value) || hasEnumerableProperty(value);
+    }
+
+    function isStrictFalse(value) {
+        return value === false;
+    }
+    function isFalse(value) {
+        return !!value;
+    }
+    /**
+     * @description 返回空对象 null undefined ''
+     * 
+     * @param {any} value 
+     * @returns 
+     */
+    function isEmpty(value) {
+        return isNull(value) || isUndefined(value) || isEmptyString(value);
+    }
+
+    var TypeDetector = {
+        is: is,
+        isArray: isArray,
+        isBoolean: isBoolean,
+        isFunction: isFunction,
+        isNative: isNative,
+        isObject: isObject,
+        isNull: isNull,
+        isNumber: isNumber,
+        isZero: isZero,
+        isNegative: isNegative,
+        isString: isString,
+        isUndefined: isUndefined,
+        isEmptyString: isEmptyString,
+        isEmptyArray: isEmptyArray,
+        isEmptyValue: isEmptyValue,
+        isEmpty: isEmpty,
+        isNaN: isNaN,
+        isStrictFalse: isStrictFalse,
+        isFalse: isFalse
+    };
+    return TypeDetector;
+});
+
+/***/ }),
 /* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    PACKAGE_NAME: 'mlux',
+    VERSION: '0.2.4',
+    EVNET: {
+        CHANGE: 'change', //store change 
+        REGISTER: 'register', //store register
+        STORAGE: 'storage', //store storage
+        STORAGE_ERROR: 'storagerrror' }
+};
+
+/***/ }),
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -881,7 +1152,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.createStore = exports.StoreManager = exports.default = undefined;
 
-var _StoreManager = __webpack_require__(7);
+var _StoreManager = __webpack_require__(6);
 
 var _StoreManager2 = _interopRequireDefault(_StoreManager);
 
@@ -889,7 +1160,7 @@ var _Store = __webpack_require__(1);
 
 var _Store2 = _interopRequireDefault(_Store);
 
-var _shim = __webpack_require__(6);
+var _shim = __webpack_require__(5);
 
 var _shim2 = _interopRequireDefault(_shim);
 

@@ -9,7 +9,7 @@ module.exports = {
     output: {
         path: 'dist',
         filename: '[name].js',
-        library: 'MLUX',
+        library: 'Mlux',
         libraryTarget: 'umd',
         umdNamedDefine: true
     },
