@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 8);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -135,7 +135,10 @@ function isEmpty(source) {
     }
     return false;
 }
-
+function isNative(fn) {
+    return (/\[native code\]/.test(fn)
+    );
+}
 exports.type = type;
 exports.isObject = isObject;
 exports.isArray = isArray;
@@ -147,6 +150,7 @@ exports.isString = isString;
 exports.isNumber = isNumber;
 exports.isBoolean = isBoolean;
 exports.isUndefined = isUndefined;
+exports.isNative = isNative;
 
 /***/ }),
 /* 1 */
@@ -158,68 +162,20 @@ exports.isUndefined = isUndefined;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.default = equlas;
-
-var _util = __webpack_require__(0);
-
-function equlas(s1, s2) {
-    if (s1 == s2) {
-        return true;
-    }
-    if (!(0, _util.isSameType)(s1, s2)) {
-        return false;
-    }
-    if ((0, _util.isArray)(s1)) {
-        if (s1.length !== s2.length) {
-            return false;
-        }
-        for (var i = 1; i < s1.length; i++) {
-            if (!equlas(s1[i], s2[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-    if ((0, _util.isObject)(s1)) {
-        var keys1 = Object.keys(s1);
-        var keys2 = Object.keys(s2);
-        if (keys1.length !== keys2.length) {
-            return false;
-        }
-        for (var o in s1) {
-            if (!equlas(s1[o], s2[o])) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
-}
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _EventEmitter2 = __webpack_require__(3);
+var _EventEmitter2 = __webpack_require__(2);
 
 var _EventEmitter3 = _interopRequireDefault(_EventEmitter2);
 
-var _emptyMethod = __webpack_require__(5);
+var _emptyMethod = __webpack_require__(4);
 
 var _emptyMethod2 = _interopRequireDefault(_emptyMethod);
 
 var _util = __webpack_require__(0);
 
-var _Observer = __webpack_require__(4);
+var _Observer = __webpack_require__(3);
 
 var _Observer2 = _interopRequireDefault(_Observer);
 
@@ -252,8 +208,8 @@ var Store = function (_EventEmitter) {
 
         var _this = _possibleConstructorReturn(this, (Store.__proto__ || Object.getPrototypeOf(Store)).call(this));
 
-        if (!(0, _util.isObject)(config.data)) {
-            throw new Error('initialize ' + config.name + ' error, data can noly be an object');
+        if (!(0, _util.isObject)(config.model)) {
+            throw new Error('initialize ' + config.name + ' error, model can noly be an object');
         }
         _this.name = config.name;
         _this._flow = config.flow;
@@ -278,8 +234,8 @@ var Store = function (_EventEmitter) {
             enumerable: false,
             configurable: false
         });
-        for (var _o in config.data) {
-            _this[_o] = config.data[_o];
+        for (var _o in config.model) {
+            _this[_o] = config.model[_o];
         }
         (0, _Observer2.default)(_this, observerCallback);
         return _this;
@@ -384,7 +340,7 @@ var Store = function (_EventEmitter) {
 exports.default = Store;
 
 /***/ }),
-/* 3 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -520,7 +476,7 @@ var EventEmitter = function () {
 exports.default = EventEmitter;
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -530,7 +486,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _equlas = __webpack_require__(1);
+var _equlas = __webpack_require__(5);
 
 var _equlas2 = _interopRequireDefault(_equlas);
 
@@ -570,7 +526,7 @@ function observerProp(object, prop, callback) {
 exports.default = observer;
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -589,7 +545,140 @@ function promise(res, rej) {
 }
 
 /***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = equlas;
+
+var _util = __webpack_require__(0);
+
+function equlas(s1, s2) {
+    if (s1 == s2) {
+        return true;
+    }
+    if (!(0, _util.isSameType)(s1, s2)) {
+        return false;
+    }
+    if ((0, _util.isArray)(s1)) {
+        if (s1.length !== s2.length) {
+            return false;
+        }
+        for (var i = 1; i < s1.length; i++) {
+            if (!equlas(s1[i], s2[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    if ((0, _util.isObject)(s1)) {
+        var keys1 = Object.keys(s1);
+        var keys2 = Object.keys(s2);
+        if (keys1.length !== keys2.length) {
+            return false;
+        }
+        for (var o in s1) {
+            if (!equlas(s1[o], s2[o])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+/***/ }),
 /* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _util = __webpack_require__(0);
+
+var hasDontEnumBug = !{
+    'toString': null
+}.propertyIsEnumerable('toString');
+var hasProtoEnumBug = function () {}.propertyIsEnumerable('prototype');
+var dontEnums = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'];
+var dontEnumsLength = dontEnums.length;
+
+if (!(0, _util.isNative)(Object.keys)) {
+    Object.keys = function (object) {
+        if (object === null || object === undefined) {
+            throw new Error(' Cannot convert undefined or null to object');
+        }
+        var theKeys = [];
+        var skipProto = hasProtoEnumBug && typeof object === 'function';
+        if (typeof object === 'string' || object && object.callee) {
+            for (var i = 0; i < object.length; ++i) {
+                theKeys.push(String(i));
+            }
+        } else {
+            for (var name in object) {
+                if (!(skipProto && name === 'prototype') && ohasOwn.call(object, name)) {
+                    theKeys.push(String(name));
+                }
+            }
+        }
+
+        if (hasDontEnumBug) {
+            var ctor = object.constructor,
+                skipConstructor = ctor && ctor.prototype === object;
+            for (var j = 0; j < dontEnumsLength; j++) {
+                var dontEnum = dontEnums[j];
+                if (!(skipConstructor && dontEnum === 'constructor') && ohasOwn.call(object, dontEnum)) {
+                    theKeys.push(dontEnum);
+                }
+            }
+        }
+        return theKeys;
+    };
+}
+function assign(dst, source) {
+    if (dst === null || dst === undefined) {
+        throw new Error(' Cannot convert undefined or null to object');
+    }
+    if (source === null || source === undefined) {
+        return;
+    }
+    var keys = Object.keys(source);
+
+    for (var i = 0, l = keys.length; i < l; i++) {
+        dst[keys[i]] = source[keys[i]];
+    }
+}
+function boxing(type, value) {
+    return Function('value', 'return new ' + type.replace(type[0], type[0].toUpperCase()) + '(value)')(value);
+}
+if (!(0, _util.isNative)(Object.assign)) {
+    Object.assign = function (dst) {
+        if (dst === null || dst === undefined) {
+            throw new Error(' Cannot convert undefined or null to object');
+        }
+        dst = boxing(typeof dst === 'undefined' ? 'undefined' : _typeof(dst), dst);
+
+        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+            args[_key - 1] = arguments[_key];
+        }
+
+        for (var i = 0, l = args.length; i < l; i++) {
+            var source = args[i];
+            assign(dst, source);
+        }
+        return dst;
+    };
+}
+
+/***/ }),
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -601,23 +690,23 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _EventEmitter2 = __webpack_require__(3);
+var _EventEmitter2 = __webpack_require__(2);
 
 var _EventEmitter3 = _interopRequireDefault(_EventEmitter2);
 
-var _Store = __webpack_require__(2);
+var _Store = __webpack_require__(1);
 
 var _Store2 = _interopRequireDefault(_Store);
 
-var _emptyMethod = __webpack_require__(5);
+var _emptyMethod = __webpack_require__(4);
 
 var _emptyMethod2 = _interopRequireDefault(_emptyMethod);
 
-var _equlas = __webpack_require__(1);
+var _equlas = __webpack_require__(5);
 
 var _equlas2 = _interopRequireDefault(_equlas);
 
-var _Observer = __webpack_require__(4);
+var _Observer = __webpack_require__(3);
 
 var _Observer2 = _interopRequireDefault(_Observer);
 
@@ -631,53 +720,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function isNative(fn) {
-    return (/\[native code\]/.test(fn)
-    );
-}
-var hasDontEnumBug = !{
-    'toString': null
-}.propertyIsEnumerable('toString');
-var hasProtoEnumBug = function () {}.propertyIsEnumerable('prototype');
-var dontEnums = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'];
-var dontEnumsLength = dontEnums.length;
-var keys = Object.keys || function (object) {
-    var theKeys = [];
-    var skipProto = hasProtoEnumBug && typeof object === 'function';
-    if (typeof object === 'string' || object && object.callee) {
-        for (var i = 0; i < object.length; ++i) {
-            theKeys.push(String(i));
-        }
-    } else {
-        for (var name in object) {
-            if (!(skipProto && name === 'prototype') && ohasOwn.call(object, name)) {
-                theKeys.push(String(name));
-            }
-        }
-    }
-
-    if (hasDontEnumBug) {
-        var ctor = object.constructor,
-            skipConstructor = ctor && ctor.prototype === object;
-        for (var j = 0; j < dontEnumsLength; j++) {
-            var dontEnum = dontEnums[j];
-            if (!(skipConstructor && dontEnum === 'constructor') && ohasOwn.call(object, dontEnum)) {
-                theKeys.push(dontEnum);
-            }
-        }
-    }
-    return theKeys;
-};
-var assign = Object.assign || function (dst, source) {
-    if (!(0, _util.isObject)(dst) || !(0, _util.isObject)(source)) {
-        throw new Error('the arguments of assign must be object');
-    }
-    var sourceKeys = keys(source);
-    sourceKeys.forEach(function (name) {
-        dst[name] = source[name];
-    });
-    return dst;
-};
 function sealProperty(object, property) {
     Object.defineProperty(object, property, {
         value: object[property],
@@ -698,8 +740,6 @@ function createStore(config, manager) {
     Object.preventExtensions(store);
     return store;
 }
-//整合多个异步一起回调
-function TaskRunner() {}
 
 //todo:脏值检测
 
@@ -830,7 +870,7 @@ var manager = new StoreManager();
 exports.default = manager;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -839,39 +879,25 @@ exports.default = manager;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.isUndefined = exports.isBoolean = exports.isNumber = exports.isString = exports.isNull = exports.isEmpty = exports.isSameType = exports.isFunction = exports.isArray = exports.isObject = exports.type = exports.createStore = exports.StoreManager = exports.equlas = exports.default = undefined;
+exports.createStore = exports.StoreManager = exports.default = undefined;
 
-var _StoreManager = __webpack_require__(6);
+var _StoreManager = __webpack_require__(7);
 
 var _StoreManager2 = _interopRequireDefault(_StoreManager);
 
-var _Store = __webpack_require__(2);
+var _Store = __webpack_require__(1);
 
 var _Store2 = _interopRequireDefault(_Store);
 
-var _util = __webpack_require__(0);
+var _shim = __webpack_require__(6);
 
-var _equlas = __webpack_require__(1);
-
-var _equlas2 = _interopRequireDefault(_equlas);
+var _shim2 = _interopRequireDefault(_shim);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _module = {
     StoreManager: _StoreManager2.default,
-    equlas: _equlas2.default,
-    type: _util.type,
-    isObject: _util.isObject,
-    isArray: _util.isArray,
-    isFunction: _util.isFunction,
-    isSameType: _util.isSameType,
-    isEmpty: _util.isEmpty,
-    isNull: _util.isNull,
-    isString: _util.isString,
-    isNumber: _util.isNumber,
-    isBoolean: _util.isBoolean,
-    isUndefined: _util.isUndefined,
-    Store: _Store2.default
+    createStore: createStore
 };
 
 function createStore(config) {
@@ -879,20 +905,8 @@ function createStore(config) {
     return new _Store2.default(config, _StoreManager2.default);
 }
 exports.default = _module;
-exports.equlas = _equlas2.default;
 exports.StoreManager = _StoreManager2.default;
 exports.createStore = createStore;
-exports.type = _util.type;
-exports.isObject = _util.isObject;
-exports.isArray = _util.isArray;
-exports.isFunction = _util.isFunction;
-exports.isSameType = _util.isSameType;
-exports.isEmpty = _util.isEmpty;
-exports.isNull = _util.isNull;
-exports.isString = _util.isString;
-exports.isNumber = _util.isNumber;
-exports.isBoolean = _util.isBoolean;
-exports.isUndefined = _util.isUndefined;
 
 /***/ })
 /******/ ]);

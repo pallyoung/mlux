@@ -25,8 +25,8 @@ function observerCallback(store) {
 export default class Store extends EventEmitter {
     constructor(config, storeManager) {
         super();
-        if (!isObject(config.data)) {
-            throw new Error('initialize ' + config.name + ' error, data can noly be an object');
+        if (!isObject(config.model)) {
+            throw new Error('initialize ' + config.name + ' error, model can noly be an object');
         }
         this.name = config.name;
         this._flow = config.flow;
@@ -51,8 +51,8 @@ export default class Store extends EventEmitter {
             enumerable: false,
             configurable: false
         })
-        for (let o in config.data) {
-            this[o] = config.data[o];
+        for (let o in config.model) {
+            this[o] = config.model[o];
         }
         observer(this, observerCallback);
     }
