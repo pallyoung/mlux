@@ -278,7 +278,7 @@ var Event = _constants2.default.EVNET;
 function observerCallback(store) {
     store.notifyChange();
 }
-var DONT_ENMU_KEYS = ['_timeout', 'name', '_flow', 'onflow', '_storage', '_manager', '_pump', 'notifyChange', 'copy', 'assign', 'pump', 'flowTo', 'onFlow', '_extends', 'onWillUnload', '_onwillunload', '_clearTimeout', '_timeoutHandles', 'set', 'get'];
+var DONT_ENMU_KEYS = ['_timeout', '_name', '_flow', 'onflow', '_storage', '_manager', '_pump', 'notifyChange', 'copy', 'assign', 'pump', 'flowTo', 'onFlow', '_extends', 'onWillUnload', '_onwillunload', '_clearTimeout', '_timeoutHandles', 'set', 'get'];
 
 var Store = function (_EventEmitter) {
     _inherits(Store, _EventEmitter);
@@ -291,7 +291,7 @@ var Store = function (_EventEmitter) {
         if (!(0, _util.isObject)(config.model)) {
             throw new Error('initialize ' + config.name + ' error, model can noly be an object');
         }
-        _this.name = config.name;
+        _this._name = config.name;
         _this._flow = config.flow || [];
         _this._onflow = config.onflow || _util.noop;
         _this._pump = config.pump;
@@ -468,112 +468,145 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var id = 1;
-var PREFIX = 'LISTENER_';
+var PREFIX = 'RECEIVER_';
 
-var Vendor = function () {
-    function Vendor(type) {
-        _classCallCheck(this, Vendor);
+function token() {
+    return PREFIX + ++id;
+}
 
-        this.type = type;
-        this.listeners = {};
+var Receiver = function () {
+    function Receiver(channel, key) {
+        _classCallCheck(this, Receiver);
+
+        this._channel = channel;
+        this._key = key;
     }
 
-    _createClass(Vendor, [{
-        key: 'addListener',
-        value: function addListener(listener) {
-            var token = PREFIX + id++;
-            this.listeners[token] = listener;
-            return token;
-        }
-    }, {
-        key: 'removeListener',
-        value: function removeListener(token) {
-            delete this.listeners[token];
+    _createClass(Receiver, [{
+        key: 'remove',
+        value: function remove() {
+            this._channel.remove(this._key);
         }
     }]);
 
-    return Vendor;
+    return Receiver;
 }();
 
-var Container = function () {
-    function Container() {
-        _classCallCheck(this, Container);
+var BordercastChannel = function () {
+    function BordercastChannel() {
+        _classCallCheck(this, BordercastChannel);
 
-        this._vendors = {};
+        this._listeners = {};
     }
 
-    _createClass(Container, [{
-        key: 'getVendor',
-        value: function getVendor(type) {
-            if (!this._vendors[type]) {
-                this._vendors[type] = new Vendor(type);
+    _createClass(BordercastChannel, [{
+        key: 'emit',
+        value: function emit() {
+            for (var key in this._listeners) {
+                var _listeners;
+
+                (_listeners = this._listeners)[key].apply(_listeners, arguments);
             }
-            return this._vendors[type];
+        }
+    }, {
+        key: 'addListener',
+        value: function addListener(listener) {
+            var key = token();
+            this._listeners[key] = listener;
+            return new Receiver(this, key);
+        }
+    }, {
+        key: 'remove',
+        value: function remove(key) {
+            delete this._listeners[key];
+        }
+    }, {
+        key: 'removeAllListeners',
+        value: function removeAllListeners() {
+            this._listeners = {};
+        }
+    }]);
+
+    return BordercastChannel;
+}();
+
+var Bordercast = function () {
+    function Bordercast() {
+        _classCallCheck(this, Bordercast);
+
+        this._channels = {};
+    }
+
+    _createClass(Bordercast, [{
+        key: 'emit',
+        value: function emit(type) {
+            if (this._channels[type]) {
+                var _channels$type;
+
+                for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+                    args[_key - 1] = arguments[_key];
+                }
+
+                (_channels$type = this._channels[type]).emit.apply(_channels$type, args);
+            }
         }
     }, {
         key: 'addListener',
         value: function addListener(type, listener) {
-            return {
-                token: this.getVendor(type).addListener(listener),
-                type: type
-            };
-        }
-    }, {
-        key: 'removeListener',
-        value: function removeListener(subscription) {
-            if (!subscription) {
-                return;
+            if (!this._channels[type]) {
+                this._channels[type] = new BordercastChannel();
             }
-            this.getVendor(subscription.type).removeListener(subscription.token);
+            return this._channels[type].addListener(listener);
         }
     }, {
         key: 'removeAllListeners',
         value: function removeAllListeners(type) {
             if (type) {
-                delete this._vendors[type];
+                this._channels[type] && this._channels[type].removeAllListeners();
             } else {
-                this._vendors = {};
+                for (var channel in this._channels) {
+                    this._channels[channel].removeAllListeners();
+                }
             }
         }
     }]);
 
-    return Container;
+    return Bordercast;
 }();
 
 var EventEmitter = function () {
     function EventEmitter() {
         _classCallCheck(this, EventEmitter);
 
-        this._container = new Container();
+        this._bordercast = new Bordercast();
     }
 
     _createClass(EventEmitter, [{
         key: 'addListener',
         value: function addListener(type, listener) {
-            return this._container.addListener(type, listener);
+            return this._bordercast.addListener(type, listener);
         }
     }, {
         key: 'removeListener',
-        value: function removeListener(subscription) {
-            this._container.removeListener(subscription);
+        value: function removeListener(receiver) {
+            receiver.remove();
         }
     }, {
         key: 'removeAllListeners',
         value: function removeAllListeners(type) {
-            this._container.removeAllListeners(type);
+            this._bordercast.removeAllListeners(type);
         }
     }, {
         key: 'emit',
         value: function emit(type) {
-            var listeners = this._container.getVendor(type).listeners;
+            var _console, _bordercast;
 
-            for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-                args[_key - 1] = arguments[_key];
+            for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+                args[_key2 - 1] = arguments[_key2];
             }
 
-            for (var l in listeners) {
-                listeners[l].apply(listeners, args);
-            }
+            (_console = console).log.apply(_console, ['type'].concat(args));
+            (_bordercast = this._bordercast).emit.apply(_bordercast, [type].concat(args));
         }
     }]);
 

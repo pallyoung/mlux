@@ -1,71 +1,89 @@
 'use strict'
 
 var id = 1;
-const PREFIX = 'LISTENER_';
+const PREFIX = 'RECEIVER_';
 
-class Vendor {
-    constructor(type) {
-        this.type = type;
-        this.listeners = {}
+function token() {
+    return PREFIX + ++id;
+}
+class Receiver {
+    constructor(channel,key) {
+        this._channel = channel;
+        this._key = key;
     }
-    addListener(listener) {
-        var token = PREFIX + id++;
-        this.listeners[token] = listener;
-        return token;
-    }
-    removeListener(token) {
-        delete this.listeners[token];
+    remove() {
+        this._channel.remove(this._key);
     }
 }
-
-class Container {
+class BordercastChannel {
     constructor() {
-        this._vendors = {}
-    }
-    getVendor(type) {
-        if (!this._vendors[type]) {
-            this._vendors[type] = new Vendor(type);
+        this._listeners = {
+
         }
-        return this._vendors[type];
     }
+    emit(...args){
+        for(var key in this._listeners){
+            this._listeners[key](...args);
+        }
+    }
+    addListener(listener) {
+        var key = token();
+        this._listeners[key] = listener;
+        return new Receiver(this,key);
+    }
+    remove(key){
+        delete this._listeners[key];
+    }
+    removeAllListeners() {
+        this._listeners = {
+
+        }
+    }
+}
+class Bordercast {
+    constructor() {
+        this._channels = {
+
+        }
+    }
+    emit(type,...args){
+        if(this._channels[type]){
+            this._channels[type].emit(...args);
+        }
+    }
+
     addListener(type, listener) {
-        return {
-            token: this.getVendor(type).addListener(listener),
-            type: type
-        };
-    }
-    removeListener(subscription) {
-        if (!subscription) {
-            return;
+        if (!this._channels[type]) {
+            this._channels[type] = new BordercastChannel();
         }
-        this.getVendor(subscription.type).removeListener(subscription.token);
+        return this._channels[type].addListener(listener);
     }
     removeAllListeners(type) {
         if (type) {
-            delete this._vendors[type];
-        } else {
-            this._vendors = {}
+            this._channels[type] && this._channels[type].removeAllListeners();
+        }else{
+            for(var channel  in  this._channels){
+                this._channels[channel].removeAllListeners();
+            }
         }
-    }
 
+    }
 }
+
 export default class EventEmitter {
     constructor() {
-        this._container = new Container();
+        this._bordercast = new Bordercast();
     }
     addListener(type, listener) {
-        return this._container.addListener(type, listener);
+        return this._bordercast.addListener(type, listener);
     }
-    removeListener(subscription) {
-        this._container.removeListener(subscription);
+    removeListener(receiver) {
+        receiver.remove();
     }
     removeAllListeners(type) {
-        this._container.removeAllListeners(type)
+        this._bordercast.removeAllListeners(type)
     }
     emit(type, ...args) {
-        var listeners = this._container.getVendor(type).listeners;
-        for (let l in listeners) {
-            listeners[l](...args);
-        }
+        this._bordercast.emit(type,...args);
     }
 }

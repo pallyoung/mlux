@@ -83,9 +83,14 @@ class StoreManager extends EventEmitter {
         } else {
             return this.store(c);
         }
-
-
     }
+    /**
+     * 
+     * 
+     * @param {any} name 
+     * 
+     * @memberOf StoreManager
+     */
     unload(name) {
         var store = this[name];
         store.onWillUnload();

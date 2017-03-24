@@ -120,9 +120,9 @@ export default class Store extends EventEmitter {
         clearTimeout(this._timeoutHandles.change);
         this._timeoutHandles.change = setTimeout(() => {
             this.emit(Event.CHANGE);
-            this._manager.emit(Event.CHANGE, this.name);
+            this._manager.emit(Event.CHANGE, this._name);
             if (this._storage) {
-                this._manager.syncStorage(this.name, this.copy());
+                this._manager.syncStorage(this._name, this.copy());
             }
             this.flowTo();
         }, 10);
