@@ -27,7 +27,7 @@ function observerCallback(store) {
 }
 var DONT_ENMU_KEYS = [
     '_timeout',
-    'name',
+    '_name',
     '_flow',
     'onflow',
     '_storage',
@@ -53,7 +53,7 @@ export default class Store extends EventEmitter {
         if (!isObject(config.model)) {
             throw new Error('initialize ' + config.name + ' error, model can noly be an object');
         }
-        this.name = config.name;
+        this._name = config.name;
         this._flow = config.flow || [];
         this._onflow = config.onflow || noop;
         this._pump = config.pump;
