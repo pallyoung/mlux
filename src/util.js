@@ -47,26 +47,30 @@ function isNative(fn) {
     return (/\[native code\]/.test(fn));
 }
 
-function forEach(source, filter,callback) {
+function forEach(source, filter, callback) {
     var keys = [];
-    if(isFunction(filter)){
+    if (isFunction(filter)) {
         callback = filter;
         filter = [];
     }
-    if(!isFunction(callback)){
+    if (!isFunction(callback)) {
         return;
-    }
-    if (!isArray(filter)) {
-        throw new Error('filter can only be Array');
     }
     if (isArray(source) || isObject(source)) {
         keys = Object.keys(source);
-        keys.forEach(function (v) {
-            //不需要过滤
-            if(filter.indexOf(v)<0){
-                callback(source[v],v,source);
-            }
-        })
+        if (!isArray(filter)) {
+            keys.forEach(function (v) {
+                callback(source[v], v, source);
+            })
+        } else {
+            keys.forEach(function (v) {
+                //不需要过滤
+                if (filter.indexOf(v) < 0) {
+                    callback(source[v], v, source);
+                }
+            });
+        }
+
     }
 }
 function noop() {
@@ -90,8 +94,8 @@ function promiseNoop() {
 function defineProperty(object, property, config) {
     return Object.defineProperty(object, property, config);
 }
-function freezeProperty(object, property){
-     defineProperty(object, property, {
+function freezeProperty(object, property) {
+    defineProperty(object, property, {
         value: object[property],
         writable: false,
         enumerable: false,
@@ -106,7 +110,7 @@ function sealProperty(object, property) {
         configurable: false
     });
 }
-function immutableProperty(object, property){
+function immutableProperty(object, property) {
     defineProperty(object, property, {
         value: object[property],
         writable: false,
@@ -114,7 +118,7 @@ function immutableProperty(object, property){
         configurable: true
     });
 }
-function preventExtensions(object){
+function preventExtensions(object) {
     return Object.preventExtensions(object);
 }
 export {

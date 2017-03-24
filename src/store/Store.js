@@ -47,55 +47,28 @@ var DONT_ENMU_KEYS = [
     'set',
     'get'
 ];
-export default class Store extends EventEmitter {
-    constructor(config, storeManager) {
-        super();
-        if (!isObject(config.model)) {
-            throw new Error('initialize ' + config.name + ' error, model can noly be an object');
-        }
-        this._name = config.name;
-        this._flow = config.flow || [];
-        this._onflow = config.onflow || noop;
-        this._pump = config.pump;
-        this._onwillunload = config.onwillunload || noop;
-        this._onload = config.onload || noop;
-        //是否同步到本地
-        this._storage = config.storage || false;
-        this._manager = storeManager;
-
-        this._timeoutHandles = {
-            change: undefined
-        }
-        forEach(this, function (v, key, self) {
-            freezeProperty(self, key);
-        });
-
-        for (let o in config.model) {
-            this[o] = config.model[o];
-        }
-        observer(this, observerCallback);
+class BaseStore {
+    constructor() {
     }
-
-
     _extends(source) {
         if (!isObject(source)) {
             return this;
         }
-        forEach(source, DONT_ENMU_KEYS, (v, key) => {
-            this.set(key,v);
+        forEach(source, (v, key) => {
+            this.set(key, v);
         });
     }
     //复制store中的值
     copy() {
         var dst = {}
-        forEach(this, DONT_ENMU_KEYS, function (v, key) {
+        forEach(this, function (v, key) {
             dst[key] = v;
         });
         return dst;
     }
     //遍历
     forEach(callback) {
-        forEach(this, DONT_ENMU_KEYS, (v, key) => {
+        forEach(this, (v, key) => {
             callback(v, key, this);
         })
     }
@@ -104,46 +77,6 @@ export default class Store extends EventEmitter {
             this._extends(args[i]);
         }
         return this;
-    }
-    //从一个特定的地方获取值
-    pump(...args) {
-        if (isFunction(this._pump)) {
-            return this._pump(...args).then((data) => {
-                this.assign(data);
-                return this;
-            })
-        } else {
-            return promiseNoop();
-        }
-    }
-    notifyChange() {
-        clearTimeout(this._timeoutHandles.change);
-        this._timeoutHandles.change = setTimeout(() => {
-            this.emit(Event.CHANGE);
-            this._manager.emit(Event.CHANGE, this._name);
-            if (this._storage) {
-                this._manager.syncStorage(this._name, this.copy());
-            }
-            this.flowTo();
-        }, 10);
-
-    }
-    flowTo() {
-        if (isArray(this._flow)) {
-            this._flow.forEach((storeName) => {
-                let store = this._manager[storeName];
-                store.onFlow(this);
-            });
-        }
-    }
-    onFlow(store) {
-        if (isFunction(this._onflow)) {
-            this._onFlow(store);
-        }
-    }
-    onWillUnload() {
-        clearTimeout(this._timeoutHandles.change);
-        this._onwillunload();
     }
     set(key, value) {
         let oldValue = this[key];
@@ -169,3 +102,86 @@ export default class Store extends EventEmitter {
         return this[key];
     }
 }
+export default function StoreFactory(config, storeManager) {
+    if (!isObject(config.model)) {
+        throw new Error('initialize ' + config.name + ' error, model can noly be an object');
+    }
+    var name = config.name;
+    var flow = config.flow || [];
+    var onflow = config.onflow || noop;
+    var pump = config.pump;
+    var onwillunload = config.onwillunload || noop;
+    var onload = config.onload || noop;
+    var storage = config.storage || false;
+    var manager = storeManager;
+    var eventEmitter = new EventEmitter();
+    var timeoutHandles = {
+        change: undefined
+    }
+    class Store extends BaseStore {
+        constructor() {
+            super();
+            for (let o in config.model) {
+                this[o] = config.model[o];
+            }
+            observer(this, observerCallback);
+        }
+        getStoreName() {
+            return name;
+        }
+        addListener(type, listener) {
+            return eventEmitter.addListener(type, listener);
+        }
+        removeListener(...args) {
+            return eventEmitter.removeListener(...args);
+        }
+        removeAllListeners() {
+            return eventEmitter.removeAllListeners(...args);
+        }
+        emit(type, ...args) {
+            return eventEmitter.emit(type, ...args);
+        }
+        notifyChange() {
+            clearTimeout(timeoutHandles.change);
+            timeoutHandles.change = setTimeout(() => {
+                this.emit(Event.CHANGE);
+                manager.emit(Event.CHANGE, name);
+                if (storage) {
+                    manager.syncStorage(name, this.copy());
+                }
+                this.flowTo();
+            }, 10);
+
+        }
+        onWillUnload() {
+            clearTimeout(timeoutHandles.change);
+            onwillunload();
+        }
+        flowTo() {
+            if (isArray(flow)) {
+                flow.forEach((storeName) => {
+                    let store = manager[storeName];
+                    store.onFlow(this);
+                });
+            }
+        }
+        onFlow(store) {
+            if (isFunction(onflow)) {
+                onFlow(store).call(this);
+            }
+        }
+        //从一个特定的地方获取值
+        pump(...args) {
+            if (isFunction(pump)) {
+                return pump(...args).then((data) => {
+                    this.assign(data);
+                    return this;
+                })
+            } else {
+                return promiseNoop();
+            }
+        }
+    }
+    return new Store();
+}
+

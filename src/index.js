@@ -1,6 +1,6 @@
 'use strict'
 import StoreManager from './store/StoreManager';
-import Store from './store/Store';
+import storeFactory from './store/Store';
 import shim from './shim.js';
 
 var module = {
@@ -10,7 +10,7 @@ var module = {
 
 function createStore(config){
     config.storage = false;
-    return new Store(config,StoreManager);
+    return storeFactory(config,StoreManager);
 }
 export {
     module as default,

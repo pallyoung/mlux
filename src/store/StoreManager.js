@@ -1,6 +1,6 @@
 'use strict'
 import EventEmitter from './../EventEmitter';
-import Store from './Store';
+import StoreFactory from './Store';
 import equlas from './../equlas';
 import observer from './../Observer';
 import {
@@ -11,41 +11,38 @@ import {
     promiseNoop,
     sealProperty,
     forEach,
-    freezeProperty,
     immutableProperty,
     preventExtensions
 } from './../util';
 
 
-
-
-
-function createStore(config, manager) {
-    var store = new Store(config, manager);
-    manager[config.name] = store;
-    immutableProperty(manager, config.name);
-    preventExtensions(store);
-    return store;
+var storageTool = {
+    setter: promiseNoop,
+    getter: promiseNoop
 }
+var eventEmitter = new EventEmitter();
+
 
 //todo:脏值检测
-class StoreManager extends EventEmitter {
+class StoreManager {
     constructor() {
-        super();
-        for (let o in this) {
-            freezeProperty(this, o)
-        }
-        this.storageTool = {
-            setter: promiseNoop,
-            getter: promiseNoop
-        }
+
     }
+    addListener(...args) {
+        eventEmitter.addListener(...args);
+    }
+    removeListener(...args) {
+        eventEmitter.removeListener(...args);
+    }
+    removeAllListeners(...args) {
+        eventEmitter.removeListener(...args);
+    }
+    emit(...args) {
+        eventEmitter.emit(...args);
+    }
+
     setStorageTool(tool) {
-        /**
-         * setter(name,value) return promise
-         * getter(name) return promise
-         */
-        this.storageTool = tool;
+        storageTool = tool;
     }
     store(config) {
         if (config.storage) {
@@ -64,30 +61,28 @@ class StoreManager extends EventEmitter {
     }
     /**
      * 
-     * 
-     * @param {any|array} config 
+     * @param {object|array} config 
      * @returns 
      * 
      * @memberOf StoreManager
      */
-    load(config) {
-        if (isArray(config)) {
-            var c = config.pop();
-            if (c) {
-                return this.store(c).then(() => {
-                    return this.load(config);
+    load(configs) {
+        if (isArray(configs)) {
+            var config= configs.pop();
+            if (config) {
+                return this.store(config).then(() => {
+                    return this.load(configs);
                 })
             } else {
                 return Promise.resolve();
             }
         } else {
-            return this.store(c);
+            return this.store(configs);
         }
     }
     /**
      * 
-     * 
-     * @param {any} name 
+     * @param {string|array} name 
      * 
      * @memberOf StoreManager
      */
@@ -101,7 +96,7 @@ class StoreManager extends EventEmitter {
     /**
      * 
      * 
-     * @param {any} name 
+     * @param {string} name 
      * @param {any} value 
      * @returns Promise
      * 
@@ -109,9 +104,9 @@ class StoreManager extends EventEmitter {
      */
     syncStorage(name, value) {
         if (value) {
-            return this.storageTool.setter(name, value);
+            return storageTool.setter(name, value);
         } else {
-            return this.storageTool.getter(name);
+            return storageTool.getter(name);
         }
     }
 
@@ -125,5 +120,16 @@ class StoreManager extends EventEmitter {
     }
 
 }
+
+
+function createStore(config, manager) {
+    var store = StoreFactory(config, manager);
+    manager[config.name] = store;
+    immutableProperty(manager, config.name);
+    preventExtensions(store);
+    return store;
+}
 var manager = new StoreManager();
+
+
 export default manager;

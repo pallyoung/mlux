@@ -1,7 +1,7 @@
 'use strict'
 export default {
     PACKAGE_NAME:'mlux',
-    VERSION:'0.2.4',
+    VERSION:'0.2.5',
     EVNET:{
         CHANGE:'change',//store change 
         REGISTER:'register',//store register

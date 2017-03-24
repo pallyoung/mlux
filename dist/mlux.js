@@ -153,17 +153,20 @@ function forEach(source, filter, callback) {
     if (!isFunction(callback)) {
         return;
     }
-    if (!isArray(filter)) {
-        throw new Error('filter can only be Array');
-    }
     if (isArray(source) || isObject(source)) {
         keys = Object.keys(source);
-        keys.forEach(function (v) {
-            //不需要过滤
-            if (filter.indexOf(v) < 0) {
+        if (!isArray(filter)) {
+            keys.forEach(function (v) {
                 callback(source[v], v, source);
-            }
-        });
+            });
+        } else {
+            keys.forEach(function (v) {
+                //不需要过滤
+                if (filter.indexOf(v) < 0) {
+                    callback(source[v], v, source);
+                }
+            });
+        }
     }
 }
 function noop() {}
@@ -246,9 +249,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _EventEmitter2 = __webpack_require__(2);
+exports.default = StoreFactory;
 
-var _EventEmitter3 = _interopRequireDefault(_EventEmitter2);
+var _EventEmitter = __webpack_require__(2);
+
+var _EventEmitter2 = _interopRequireDefault(_EventEmitter);
 
 var _util = __webpack_require__(0);
 
@@ -262,11 +267,13 @@ var _Observer2 = _interopRequireDefault(_Observer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Event = _constants2.default.EVNET;
 
@@ -280,51 +287,21 @@ function observerCallback(store) {
 }
 var DONT_ENMU_KEYS = ['_timeout', '_name', '_flow', 'onflow', '_storage', '_manager', '_pump', 'notifyChange', 'copy', 'assign', 'pump', 'flowTo', 'onFlow', '_extends', 'onWillUnload', '_onwillunload', '_clearTimeout', '_timeoutHandles', 'set', 'get'];
 
-var Store = function (_EventEmitter) {
-    _inherits(Store, _EventEmitter);
-
-    function Store(config, storeManager) {
-        _classCallCheck(this, Store);
-
-        var _this = _possibleConstructorReturn(this, (Store.__proto__ || Object.getPrototypeOf(Store)).call(this));
-
-        if (!(0, _util.isObject)(config.model)) {
-            throw new Error('initialize ' + config.name + ' error, model can noly be an object');
-        }
-        _this._name = config.name;
-        _this._flow = config.flow || [];
-        _this._onflow = config.onflow || _util.noop;
-        _this._pump = config.pump;
-        _this._onwillunload = config.onwillunload || _util.noop;
-        _this._onload = config.onload || _util.noop;
-        //是否同步到本地
-        _this._storage = config.storage || false;
-        _this._manager = storeManager;
-
-        _this._timeoutHandles = {
-            change: undefined
-        };
-        (0, _util.forEach)(_this, function (v, key, self) {
-            (0, _util.freezeProperty)(self, key);
-        });
-
-        for (var o in config.model) {
-            _this[o] = config.model[o];
-        }
-        (0, _Observer2.default)(_this, observerCallback);
-        return _this;
+var BaseStore = function () {
+    function BaseStore() {
+        _classCallCheck(this, BaseStore);
     }
 
-    _createClass(Store, [{
+    _createClass(BaseStore, [{
         key: '_extends',
         value: function _extends(source) {
-            var _this2 = this;
+            var _this = this;
 
             if (!(0, _util.isObject)(source)) {
                 return this;
             }
-            (0, _util.forEach)(source, DONT_ENMU_KEYS, function (v, key) {
-                _this2.set(key, v);
+            (0, _util.forEach)(source, function (v, key) {
+                _this.set(key, v);
             });
         }
         //复制store中的值
@@ -333,7 +310,7 @@ var Store = function (_EventEmitter) {
         key: 'copy',
         value: function copy() {
             var dst = {};
-            (0, _util.forEach)(this, DONT_ENMU_KEYS, function (v, key) {
+            (0, _util.forEach)(this, function (v, key) {
                 dst[key] = v;
             });
             return dst;
@@ -343,10 +320,10 @@ var Store = function (_EventEmitter) {
     }, {
         key: 'forEach',
         value: function forEach(callback) {
-            var _this3 = this;
+            var _this2 = this;
 
-            (0, _util.forEach)(this, DONT_ENMU_KEYS, function (v, key) {
-                callback(v, key, _this3);
+            (0, _util.forEach)(this, function (v, key) {
+                callback(v, key, _this2);
             });
         }
     }, {
@@ -360,62 +337,6 @@ var Store = function (_EventEmitter) {
                 this._extends(args[i]);
             }
             return this;
-        }
-        //从一个特定的地方获取值
-
-    }, {
-        key: 'pump',
-        value: function pump() {
-            var _this4 = this;
-
-            if ((0, _util.isFunction)(this._pump)) {
-                return this._pump.apply(this, arguments).then(function (data) {
-                    _this4.assign(data);
-                    return _this4;
-                });
-            } else {
-                return (0, _util.promiseNoop)();
-            }
-        }
-    }, {
-        key: 'notifyChange',
-        value: function notifyChange() {
-            var _this5 = this;
-
-            clearTimeout(this._timeoutHandles.change);
-            this._timeoutHandles.change = setTimeout(function () {
-                _this5.emit(Event.CHANGE);
-                _this5._manager.emit(Event.CHANGE, _this5.name);
-                if (_this5._storage) {
-                    _this5._manager.syncStorage(_this5.name, _this5.copy());
-                }
-                _this5.flowTo();
-            }, 10);
-        }
-    }, {
-        key: 'flowTo',
-        value: function flowTo() {
-            var _this6 = this;
-
-            if ((0, _util.isArray)(this._flow)) {
-                this._flow.forEach(function (storeName) {
-                    var store = _this6._manager[storeName];
-                    store.onFlow(_this6);
-                });
-            }
-        }
-    }, {
-        key: 'onFlow',
-        value: function onFlow(store) {
-            if ((0, _util.isFunction)(this._onflow)) {
-                this._onFlow(store);
-            }
-        }
-    }, {
-        key: 'onWillUnload',
-        value: function onWillUnload() {
-            clearTimeout(this._timeoutHandles.change);
-            this._onwillunload();
         }
     }, {
         key: 'set',
@@ -447,10 +368,143 @@ var Store = function (_EventEmitter) {
         }
     }]);
 
-    return Store;
-}(_EventEmitter3.default);
+    return BaseStore;
+}();
 
-exports.default = Store;
+function StoreFactory(config, storeManager) {
+    if (!(0, _util.isObject)(config.model)) {
+        throw new Error('initialize ' + config.name + ' error, model can noly be an object');
+    }
+    var name = config.name;
+    var flow = config.flow || [];
+    var onflow = config.onflow || _util.noop;
+    var _pump = config.pump;
+    var onwillunload = config.onwillunload || _util.noop;
+    var onload = config.onload || _util.noop;
+    var storage = config.storage || false;
+    var manager = storeManager;
+    var eventEmitter = new _EventEmitter2.default();
+    var timeoutHandles = {
+        change: undefined
+    };
+
+    var Store = function (_BaseStore) {
+        _inherits(Store, _BaseStore);
+
+        function Store() {
+            _classCallCheck(this, Store);
+
+            var _this3 = _possibleConstructorReturn(this, (Store.__proto__ || Object.getPrototypeOf(Store)).call(this));
+
+            for (var o in config.model) {
+                _this3[o] = config.model[o];
+            }
+            (0, _Observer2.default)(_this3, observerCallback);
+            return _this3;
+        }
+
+        _createClass(Store, [{
+            key: 'getStoreName',
+            value: function getStoreName() {
+                return name;
+            }
+        }, {
+            key: 'addListener',
+            value: function addListener(type, listener) {
+                return eventEmitter.addListener(type, listener);
+            }
+        }, {
+            key: 'removeListener',
+            value: function removeListener() {
+                return eventEmitter.removeListener.apply(eventEmitter, arguments);
+            }
+        }, {
+            key: 'removeAllListeners',
+            value: function removeAllListeners() {
+                return eventEmitter.removeAllListeners.apply(eventEmitter, _toConsumableArray(args));
+            }
+        }, {
+            key: 'emit',
+            value: function emit(type) {
+                for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+                    args[_key2 - 1] = arguments[_key2];
+                }
+
+                return eventEmitter.emit.apply(eventEmitter, [type].concat(args));
+            }
+        }, {
+            key: 'notifyChange',
+            value: function notifyChange() {
+                var _this4 = this;
+
+                clearTimeout(timeoutHandles.change);
+                timeoutHandles.change = setTimeout(function () {
+                    _this4.emit(Event.CHANGE);
+                    manager.emit(Event.CHANGE, name);
+                    if (storage) {
+                        manager.syncStorage(name, _this4.copy());
+                    }
+                    _this4.flowTo();
+                }, 10);
+            }
+        }, {
+            key: 'onWillUnload',
+            value: function onWillUnload() {
+                clearTimeout(timeoutHandles.change);
+                onwillunload();
+            }
+        }, {
+            key: 'flowTo',
+            value: function flowTo() {
+                var _this5 = this;
+
+                if ((0, _util.isArray)(flow)) {
+                    flow.forEach(function (storeName) {
+                        var store = manager[storeName];
+                        store.onFlow(_this5);
+                    });
+                }
+            }
+        }, {
+            key: 'onFlow',
+            value: function (_onFlow) {
+                function onFlow(_x) {
+                    return _onFlow.apply(this, arguments);
+                }
+
+                onFlow.toString = function () {
+                    return _onFlow.toString();
+                };
+
+                return onFlow;
+            }(function (store) {
+                if ((0, _util.isFunction)(onflow)) {
+                    onFlow(store).call(this);
+                }
+            })
+            //从一个特定的地方获取值
+
+        }, {
+            key: 'pump',
+            value: function pump() {
+                var _this6 = this;
+
+                if ((0, _util.isFunction)(_pump)) {
+                    return _pump.apply(undefined, arguments).then(function (data) {
+                        _this6.assign(data);
+                        return _this6;
+                    });
+                } else {
+                    return (0, _util.promiseNoop)();
+                }
+            }
+        }]);
+
+        return Store;
+    }(BaseStore);
+
+    return new Store();
+}
 
 /***/ }),
 /* 2 */
@@ -599,13 +653,12 @@ var EventEmitter = function () {
     }, {
         key: 'emit',
         value: function emit(type) {
-            var _console, _bordercast;
+            var _bordercast;
 
             for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
                 args[_key2 - 1] = arguments[_key2];
             }
 
-            (_console = console).log.apply(_console, ['type'].concat(args));
             (_bordercast = this._bordercast).emit.apply(_bordercast, [type].concat(args));
         }
     }]);
@@ -808,9 +861,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _EventEmitter2 = __webpack_require__(2);
+var _EventEmitter = __webpack_require__(2);
 
-var _EventEmitter3 = _interopRequireDefault(_EventEmitter2);
+var _EventEmitter2 = _interopRequireDefault(_EventEmitter);
 
 var _Store = __webpack_require__(1);
 
@@ -830,51 +883,48 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function createStore(config, manager) {
-    var store = new _Store2.default(config, manager);
-    manager[config.name] = store;
-    (0, _util.immutableProperty)(manager, config.name);
-    (0, _util.preventExtensions)(store);
-    return store;
-}
+var storageTool = {
+    setter: _util.promiseNoop,
+    getter: _util.promiseNoop
+};
+var eventEmitter = new _EventEmitter2.default();
 
 //todo:脏值检测
 
-var StoreManager = function (_EventEmitter) {
-    _inherits(StoreManager, _EventEmitter);
-
+var StoreManager = function () {
     function StoreManager() {
         _classCallCheck(this, StoreManager);
-
-        var _this = _possibleConstructorReturn(this, (StoreManager.__proto__ || Object.getPrototypeOf(StoreManager)).call(this));
-
-        for (var o in _this) {
-            (0, _util.freezeProperty)(_this, o);
-        }
-        _this.storageTool = {
-            setter: _util.promiseNoop,
-            getter: _util.promiseNoop
-        };
-        return _this;
     }
 
     _createClass(StoreManager, [{
+        key: 'addListener',
+        value: function addListener() {
+            eventEmitter.addListener.apply(eventEmitter, arguments);
+        }
+    }, {
+        key: 'removeListener',
+        value: function removeListener() {
+            eventEmitter.removeListener.apply(eventEmitter, arguments);
+        }
+    }, {
+        key: 'removeAllListeners',
+        value: function removeAllListeners() {
+            eventEmitter.removeListener.apply(eventEmitter, arguments);
+        }
+    }, {
+        key: 'emit',
+        value: function emit() {
+            eventEmitter.emit.apply(eventEmitter, arguments);
+        }
+    }, {
         key: 'setStorageTool',
         value: function setStorageTool(tool) {
-            /**
-             * setter(name,value) return promise
-             * getter(name) return promise
-             */
-            this.storageTool = tool;
+            storageTool = tool;
         }
     }, {
         key: 'store',
         value: function store(config) {
-            var _this2 = this;
+            var _this = this;
 
             if (config.storage) {
                 return this.syncStorage(config.name).then(function (cache) {
@@ -883,7 +933,7 @@ var StoreManager = function (_EventEmitter) {
                             if (cache[o]) config.model[o] = cache[o];
                         }
                     }
-                    return createStore(config, _this2);
+                    return createStore(config, _this);
                 });
             } else {
                 return Promise.resolve(createStore(config, this));
@@ -892,7 +942,7 @@ var StoreManager = function (_EventEmitter) {
         /**
          * 
          * 
-         * @param {any|array} config 
+         * @param {object|array} config 
          * @returns 
          * 
          * @memberOf StoreManager
@@ -901,13 +951,13 @@ var StoreManager = function (_EventEmitter) {
     }, {
         key: 'load',
         value: function load(config) {
-            var _this3 = this;
+            var _this2 = this;
 
             if ((0, _util.isArray)(config)) {
                 var c = config.pop();
                 if (c) {
                     return this.store(c).then(function () {
-                        return _this3.load(config);
+                        return _this2.load(config);
                     });
                 } else {
                     return Promise.resolve();
@@ -916,6 +966,14 @@ var StoreManager = function (_EventEmitter) {
                 return this.store(c);
             }
         }
+        /**
+         * 
+         * 
+         * @param {string|array} name 
+         * 
+         * @memberOf StoreManager
+         */
+
     }, {
         key: 'unload',
         value: function unload(name) {
@@ -928,7 +986,7 @@ var StoreManager = function (_EventEmitter) {
         /**
          * 
          * 
-         * @param {any} name 
+         * @param {string} name 
          * @param {any} value 
          * @returns Promise
          * 
@@ -939,18 +997,18 @@ var StoreManager = function (_EventEmitter) {
         key: 'syncStorage',
         value: function syncStorage(name, value) {
             if (value) {
-                return this.storageTool.setter(name, value);
+                return storageTool.setter(name, value);
             } else {
-                return this.storageTool.getter(name);
+                return storageTool.getter(name);
             }
         }
     }, {
         key: 'flow',
         value: function flow(flowIn, flows) {
-            var _this4 = this;
+            var _this3 = this;
 
             flows.forEach(function (storeName) {
-                var store = _this4[storeName];
+                var store = _this3[storeName];
                 if (store.onFlow) {
                     store.onFlow(flowIn);
                 }
@@ -959,9 +1017,17 @@ var StoreManager = function (_EventEmitter) {
     }]);
 
     return StoreManager;
-}(_EventEmitter3.default);
+}();
 
+function createStore(config, manager) {
+    var store = (0, _Store2.default)(config, manager);
+    manager[config.name] = store;
+    (0, _util.immutableProperty)(manager, config.name);
+    (0, _util.preventExtensions)(store);
+    return store;
+}
 var manager = new StoreManager();
+
 exports.default = manager;
 
 /***/ }),
