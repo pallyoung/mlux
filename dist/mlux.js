@@ -941,7 +941,6 @@ var StoreManager = function () {
         }
         /**
          * 
-         * 
          * @param {object|array} config 
          * @returns 
          * 
@@ -950,24 +949,23 @@ var StoreManager = function () {
 
     }, {
         key: 'load',
-        value: function load(config) {
+        value: function load(configs) {
             var _this2 = this;
 
-            if ((0, _util.isArray)(config)) {
-                var c = config.pop();
-                if (c) {
-                    return this.store(c).then(function () {
-                        return _this2.load(config);
+            if ((0, _util.isArray)(configs)) {
+                var config = configs.pop();
+                if (config) {
+                    return this.store(config).then(function () {
+                        return _this2.load(configs);
                     });
                 } else {
                     return Promise.resolve();
                 }
             } else {
-                return this.store(c);
+                return this.store(configs);
             }
         }
         /**
-         * 
          * 
          * @param {string|array} name 
          * 
@@ -1234,7 +1232,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
     PACKAGE_NAME: 'mlux',
-    VERSION: '0.2.4',
+    VERSION: '0.2.5',
     EVNET: {
         CHANGE: 'change', //store change 
         REGISTER: 'register', //store register
@@ -1275,7 +1273,7 @@ var _module = {
 
 function createStore(config) {
     config.storage = false;
-    return new _Store2.default(config, _StoreManager2.default);
+    return (0, _Store2.default)(config, _StoreManager2.default);
 }
 exports.default = _module;
 exports.StoreManager = _StoreManager2.default;
