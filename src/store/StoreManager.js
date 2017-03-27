@@ -12,7 +12,6 @@ import {
     sealProperty,
     forEach,
     immutableProperty,
-    preventExtensions
 } from './../util';
 
 
@@ -126,7 +125,6 @@ function createStore(config, manager) {
     var store = StoreFactory(config, manager);
     manager[config.name] = store;
     immutableProperty(manager, config.name);
-    preventExtensions(store);
     return store;
 }
 var manager = new StoreManager();

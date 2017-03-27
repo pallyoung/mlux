@@ -90,7 +90,7 @@ exports.forEach = exports.preventExtensions = exports.immutableProperty = export
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _jsTypeDetector = __webpack_require__(7);
+var _jsTypeDetector = __webpack_require__(6);
 
 var _jsTypeDetector2 = _interopRequireDefault(_jsTypeDetector);
 
@@ -261,116 +261,80 @@ var _constants = __webpack_require__(8);
 
 var _constants2 = _interopRequireDefault(_constants);
 
-var _Observer = __webpack_require__(3);
-
-var _Observer2 = _interopRequireDefault(_Observer);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Event = _constants2.default.EVNET;
 
-
 /**
- * todo
+ * @store config
+ * 
+ * {
+ *  name:''
+ *  model:{},
+ *  flow:[],
+ *  onflow:function(){
+ *  },
+ *  pump:function(){
+ *  },
+ *  onwillunload:function(){
+ *  },
+ *  onload:function(){
+ *  },
+ *  storage:true|false,
+ *  manager:storeManager,
+ *  eventEmitter:new EventEmitter(),
+ *  timeoutHandles:{
+ *    change: undefined
+ *  }
+ *  
+ * 
+ * }
  */
-
-function observerCallback(store) {
-    store.notifyChange();
+var _storeConfigContainer = {};
+function setStoreConfigByConfig(config, storeManager) {
+    var storeConfig = {
+        model: {},
+        flow: [],
+        onflow: function onflow() {},
+        pump: function pump() {},
+        onwillunload: function onwillunload() {},
+        onload: function onload() {},
+        storage: true | false,
+        manager: storeManager,
+        eventEmitter: new _EventEmitter2.default(),
+        timeoutHandles: {
+            change: undefined
+        }
+    };
 }
-var DONT_ENMU_KEYS = ['_timeout', '_name', '_flow', 'onflow', '_storage', '_manager', '_pump', 'notifyChange', 'copy', 'assign', 'pump', 'flowTo', 'onFlow', '_extends', 'onWillUnload', '_onwillunload', '_clearTimeout', '_timeoutHandles', 'set', 'get'];
 
-var BaseStore = function () {
-    function BaseStore() {
-        _classCallCheck(this, BaseStore);
+function flowTo(flow, upstream, storeManager) {
+    if ((0, _util.isArray)(flow)) {
+        flow.forEach(function (storeName) {
+            var store = manager[storeName];
+            store.onFlow(upstream);
+        });
     }
-
-    _createClass(BaseStore, [{
-        key: '_extends',
-        value: function _extends(source) {
-            var _this = this;
-
-            if (!(0, _util.isObject)(source)) {
-                return this;
-            }
-            (0, _util.forEach)(source, function (v, key) {
-                _this.set(key, v);
-            });
-        }
-        //复制store中的值
-
-    }, {
-        key: 'copy',
-        value: function copy() {
-            var dst = {};
-            (0, _util.forEach)(this, function (v, key) {
-                dst[key] = v;
-            });
-            return dst;
-        }
-        //遍历
-
-    }, {
-        key: 'forEach',
-        value: function forEach(callback) {
-            var _this2 = this;
-
-            (0, _util.forEach)(this, function (v, key) {
-                callback(v, key, _this2);
-            });
-        }
-    }, {
-        key: 'assign',
-        value: function assign() {
-            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                args[_key] = arguments[_key];
-            }
-
-            for (var i = 0, l = args.length; i < l; i++) {
-                this._extends(args[i]);
-            }
-            return this;
-        }
-    }, {
-        key: 'set',
-        value: function set(key, value) {
-            var oldValue = this[key];
-            if (!oldValue || oldValue === value || !(0, _util.isSameType)(value, oldValue)) {
-                return false;
-            }
-            this[key] = value;
-            this.notifyChange();
-            return true;
-        }
-        /**
-         * 
-         * 
-         * @param {any} args
-         * @returns
-         * 
-         * @memberOf Store
-         * @获取流程
-         * 
-         * 
-         */
-
-    }, {
-        key: 'get',
-        value: function get(key) {
-            return this[key];
-        }
-    }]);
-
-    return BaseStore;
-}();
-
+}
+function setValue(model, key, value) {
+    if (model[key] && model[key] !== value) {
+        model[key] = value;
+        return true;
+    }
+    return false;
+}
+function extend(dst, source) {
+    if ((0, _util.isObject)(source)) {
+        (0, _util.forEach)(source, function (v, key) {
+            setValue(dst, key, v);
+        });
+    }
+    return dst;
+}
 function StoreFactory(config, storeManager) {
     if (!(0, _util.isObject)(config.model)) {
         throw new Error('initialize ' + config.name + ' error, model can noly be an object');
@@ -387,26 +351,73 @@ function StoreFactory(config, storeManager) {
     var timeoutHandles = {
         change: undefined
     };
+    var model = {};
+    Object.assign(model, config.model);
 
-    var Store = function (_BaseStore) {
-        _inherits(Store, _BaseStore);
-
+    var Store = function () {
         function Store() {
             _classCallCheck(this, Store);
-
-            var _this3 = _possibleConstructorReturn(this, (Store.__proto__ || Object.getPrototypeOf(Store)).call(this));
-
-            for (var o in config.model) {
-                _this3[o] = config.model[o];
-            }
-            (0, _Observer2.default)(_this3, observerCallback);
-            return _this3;
         }
 
         _createClass(Store, [{
             key: 'getStoreName',
             value: function getStoreName() {
                 return name;
+            }
+        }, {
+            key: 'get',
+            value: function get(key) {
+                var result = model[key];
+                if ((0, _util.isArray)(result)) {
+                    return result.slice();
+                } else if ((0, _util.isObject)(result)) {
+                    return Object.assign({}, result);
+                }
+                return result;
+            }
+        }, {
+            key: 'set',
+            value: function set(key, value) {
+                if (setValue(model, key, value)) {
+                    this.notifyChange();
+                    return true;
+                };
+                return false;
+            }
+        }, {
+            key: 'assign',
+            value: function assign() {
+                for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                    args[_key] = arguments[_key];
+                }
+
+                for (var i = 0, l = args.length; i < l; i++) {
+                    extend(model, args[i]);
+                }
+                this.notifyChange();
+                return this;
+            }
+            //复制store中的值
+
+        }, {
+            key: 'copy',
+            value: function copy() {
+                var dst = {};
+                (0, _util.forEach)(model, function (v, key) {
+                    dst[key] = v;
+                });
+                return dst;
+            }
+            //遍历
+
+        }, {
+            key: 'forEach',
+            value: function forEach(callback) {
+                var _this = this;
+
+                (0, _util.forEach)(model, function (v, key) {
+                    callback(v, key, _this);
+                });
             }
         }, {
             key: 'addListener',
@@ -435,36 +446,28 @@ function StoreFactory(config, storeManager) {
         }, {
             key: 'notifyChange',
             value: function notifyChange() {
-                var _this4 = this;
+                var _this2 = this;
 
                 clearTimeout(timeoutHandles.change);
                 timeoutHandles.change = setTimeout(function () {
-                    _this4.emit(Event.CHANGE);
+                    _this2.emit(Event.CHANGE);
                     manager.emit(Event.CHANGE, name);
                     if (storage) {
-                        manager.syncStorage(name, _this4.copy());
+                        manager.syncStorage(name, _this2.copy());
                     }
-                    _this4.flowTo();
+                    flowTo(flow, _this2, manager);
                 }, 10);
             }
+            //hook
+
         }, {
             key: 'onWillUnload',
             value: function onWillUnload() {
                 clearTimeout(timeoutHandles.change);
                 onwillunload();
             }
-        }, {
-            key: 'flowTo',
-            value: function flowTo() {
-                var _this5 = this;
+            //hook
 
-                if ((0, _util.isArray)(flow)) {
-                    flow.forEach(function (storeName) {
-                        var store = manager[storeName];
-                        store.onFlow(_this5);
-                    });
-                }
-            }
         }, {
             key: 'onFlow',
             value: function (_onFlow) {
@@ -487,12 +490,12 @@ function StoreFactory(config, storeManager) {
         }, {
             key: 'pump',
             value: function pump() {
-                var _this6 = this;
+                var _this3 = this;
 
                 if ((0, _util.isFunction)(_pump)) {
                     return _pump.apply(undefined, arguments).then(function (data) {
-                        _this6.assign(data);
-                        return _this6;
+                        _this3.assign(data);
+                        return _this3;
                     });
                 } else {
                     return (0, _util.promiseNoop)();
@@ -501,7 +504,7 @@ function StoreFactory(config, storeManager) {
         }]);
 
         return Store;
-    }(BaseStore);
+    }();
 
     return new Store();
 }
@@ -678,53 +681,6 @@ exports.default = EventEmitter;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _equlas = __webpack_require__(4);
-
-var _equlas2 = _interopRequireDefault(_equlas);
-
-var _util = __webpack_require__(0);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function observer(obj, callback) {
-    for (var o in obj) {
-        observerProp(obj, o, callback);
-    }
-}
-function observerProp(object, prop, callback) {
-    var _value = object[prop];
-    (0, _util.defineProperty)(object, prop, {
-        get: function get() {
-            if ((0, _util.isArray)(_value)) {
-                return _value.slice();
-            }
-            if ((0, _util.isObject)(_value)) {
-                return Object.assign({}, _value);
-            }
-            return _value;
-        },
-        set: function set(value) {
-            if (!(0, _util.isSameType)(value, _value)) {
-                throw new Error('trying to change the type of store property ' + object.name + ' ' + prop + ' :you can not  change the type of store property');
-            }
-            _value !== value && (_value = value, callback(object));
-        },
-        configurable: false
-    });
-}
-exports.default = observer;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
 exports.default = equlas;
 
 var _util = __webpack_require__(0);
@@ -764,7 +720,7 @@ function equlas(s1, s2) {
 }
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -849,7 +805,7 @@ if (!(0, _util.isNative)(Object.assign)) {
 }
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -869,11 +825,11 @@ var _Store = __webpack_require__(1);
 
 var _Store2 = _interopRequireDefault(_Store);
 
-var _equlas = __webpack_require__(4);
+var _equlas = __webpack_require__(3);
 
 var _equlas2 = _interopRequireDefault(_equlas);
 
-var _Observer = __webpack_require__(3);
+var _Observer = __webpack_require__(7);
 
 var _Observer2 = _interopRequireDefault(_Observer);
 
@@ -1021,7 +977,6 @@ function createStore(config, manager) {
     var store = (0, _Store2.default)(config, manager);
     manager[config.name] = store;
     (0, _util.immutableProperty)(manager, config.name);
-    (0, _util.preventExtensions)(store);
     return store;
 }
 var manager = new StoreManager();
@@ -1029,7 +984,7 @@ var manager = new StoreManager();
 exports.default = manager;
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1221,6 +1176,53 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _equlas = __webpack_require__(3);
+
+var _equlas2 = _interopRequireDefault(_equlas);
+
+var _util = __webpack_require__(0);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function observer(obj, callback) {
+    for (var o in obj) {
+        observerProp(obj, o, callback);
+    }
+}
+function observerProp(object, prop, callback) {
+    var _value = object[prop];
+    (0, _util.defineProperty)(object, prop, {
+        get: function get() {
+            if ((0, _util.isArray)(_value)) {
+                return _value.slice();
+            }
+            if ((0, _util.isObject)(_value)) {
+                return Object.assign({}, _value);
+            }
+            return _value;
+        },
+        set: function set(value) {
+            if (!(0, _util.isSameType)(value, _value)) {
+                throw new Error('trying to change the type of store property ' + object.name + ' ' + prop + ' :you can not  change the type of store property');
+            }
+            _value !== value && (_value = value, callback(object));
+        },
+        configurable: false
+    });
+}
+exports.default = observer;
+
+/***/ }),
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1252,7 +1254,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.createStore = exports.StoreManager = exports.default = undefined;
 
-var _StoreManager = __webpack_require__(6);
+var _StoreManager = __webpack_require__(5);
 
 var _StoreManager2 = _interopRequireDefault(_StoreManager);
 
@@ -1260,7 +1262,7 @@ var _Store = __webpack_require__(1);
 
 var _Store2 = _interopRequireDefault(_Store);
 
-var _shim = __webpack_require__(5);
+var _shim = __webpack_require__(4);
 
 var _shim2 = _interopRequireDefault(_shim);
 

@@ -15,92 +15,78 @@ import {
 
 import constants from './../constants';
 var Event = constants.EVNET;
-import observer from './../Observer';
 
 /**
- * todo
+ * @store config
+ * 
+ * {
+ *  name:''
+ *  model:{},
+ *  flow:[],
+ *  onflow:function(){
+ *  },
+ *  pump:function(){
+ *  },
+ *  onwillunload:function(){
+ *  },
+ *  onload:function(){
+ *  },
+ *  storage:true|false,
+ *  manager:storeManager,
+ *  eventEmitter:new EventEmitter(),
+ *  timeoutHandles:{
+ *    change: undefined
+ *  }
+ *  
+ * 
+ * }
  */
+var _storeConfigContainer = {
 
-
-function observerCallback(store) {
-    store.notifyChange();
 }
-var DONT_ENMU_KEYS = [
-    '_timeout',
-    '_name',
-    '_flow',
-    'onflow',
-    '_storage',
-    '_manager',
-    '_pump',
-    'notifyChange',
-    'copy',
-    'assign',
-    'pump',
-    'flowTo',
-    'onFlow',
-    '_extends',
-    'onWillUnload',
-    '_onwillunload',
-    '_clearTimeout',
-    '_timeoutHandles',
-    'set',
-    'get'
-];
-class BaseStore {
-    constructor() {
-    }
-    _extends(source) {
-        if (!isObject(source)) {
-            return this;
+function setStoreConfigByConfig(config,storeManager) {
+    var storeConfig = {
+        model: {},
+        flow: [],
+        onflow: function () {
+        },
+        pump: function () {
+        },
+        onwillunload: function () {
+        },
+        onload: function () {
+        },
+        storage: true | false,
+        manager: storeManager,
+        eventEmitter: new EventEmitter(),
+        timeoutHandles: {
+            change: undefined
         }
-        forEach(source, (v, key) => {
-            this.set(key, v);
+    }
+}
+
+function flowTo(flow, upstream, storeManager) {
+    if (isArray(flow)) {
+        flow.forEach(function (storeName) {
+            let store = manager[storeName];
+            store.onFlow(upstream);
         });
     }
-    //复制store中的值
-    copy() {
-        var dst = {}
-        forEach(this, function (v, key) {
-            dst[key] = v;
-        });
-        return dst;
-    }
-    //遍历
-    forEach(callback) {
-        forEach(this, (v, key) => {
-            callback(v, key, this);
-        })
-    }
-    assign(...args) {
-        for (var i = 0, l = args.length; i < l; i++) {
-            this._extends(args[i]);
-        }
-        return this;
-    }
-    set(key, value) {
-        let oldValue = this[key];
-        if (!oldValue || oldValue === value || !isSameType(value, oldValue)) {
-            return false;
-        }
-        this[key] = value;
-        this.notifyChange();
+}
+function setValue(model, key, value) {
+    if (model[key] && model[key] !== value) {
+        model[key] = value;
         return true;
     }
-    /**
-     * 
-     * 
-     * @param {any} args
-     * @returns
-     * 
-     * @memberOf Store
-     * @获取流程
-     * 
-     * 
-     */
-    get(key) {
-        return this[key];
+    return false;
+}
+function extend(dst, source) {
+    if (isObject(source)) {
+        forEach(source, (v, key) => {
+            setValue(dst, key, v);
+        });
     }
+    return dst;
 }
 export default function StoreFactory(config, storeManager) {
     if (!isObject(config.model)) {
@@ -118,16 +104,53 @@ export default function StoreFactory(config, storeManager) {
     var timeoutHandles = {
         change: undefined
     }
-    class Store extends BaseStore {
+    var model = {
+
+    };
+    Object.assign(model, config.model);
+
+    class Store {
         constructor() {
-            super();
-            for (let o in config.model) {
-                this[o] = config.model[o];
-            }
-            observer(this, observerCallback);
         }
         getStoreName() {
             return name;
+        }
+        get(key) {
+            var result = model[key];
+            if (isArray(result)) {
+                return result.slice();
+            } else if (isObject(result)) {
+                return Object.assign({}, result);
+            }
+            return result;
+        }
+        set(key, value) {
+            if (setValue(model, key, value)) {
+                this.notifyChange();
+                return true;
+            };
+            return false;
+        }
+        assign(...args) {
+            for (var i = 0, l = args.length; i < l; i++) {
+                extend(model, args[i]);
+            }
+            this.notifyChange();
+            return this;
+        }
+        //复制store中的值
+        copy() {
+            var dst = {}
+            forEach(model, function (v, key) {
+                dst[key] = v;
+            });
+            return dst;
+        }
+        //遍历
+        forEach(callback) {
+            forEach(model, (v, key) => {
+                callback(v, key, this);
+            });
         }
         addListener(type, listener) {
             return eventEmitter.addListener(type, listener);
@@ -149,22 +172,16 @@ export default function StoreFactory(config, storeManager) {
                 if (storage) {
                     manager.syncStorage(name, this.copy());
                 }
-                this.flowTo();
+                flowTo(flow, this, manager);
             }, 10);
 
         }
+        //hook
         onWillUnload() {
             clearTimeout(timeoutHandles.change);
             onwillunload();
         }
-        flowTo() {
-            if (isArray(flow)) {
-                flow.forEach((storeName) => {
-                    let store = manager[storeName];
-                    store.onFlow(this);
-                });
-            }
-        }
+        //hook
         onFlow(store) {
             if (isFunction(onflow)) {
                 onFlow(store).call(this);
