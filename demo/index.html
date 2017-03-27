@@ -1,61 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>mlux demo</title>
-    <script src = '../dist/mlux.js'></script>
+    <script src='../dist/mlux.js'></script>
 </head>
+
 <body>
     <div>
-        
+        <div>
+            <h4>current user</h4>
+            <div id = 'current_user'></div>
+        </div>
+        <div id='user'>
+            <h4>add user</h4>
+            <p><span>name</span><input type="text" place-holeder='set your name'></p>
+            <p><span>age</span><input type="text" place-holeder='set your age'></p>
+            <p><span>gender</span><input type="text" place-holeder='set your gender'></p>
+            <input type="button" value='add' id = 'add_user'>
+        </div>
+        <h3>user list </h3>
+        <ul id='userlist'>
+
+        </ul>
     </div>
     <script>
-       var manager = Mlux.StoreManager;
+        var manager = Mlux.StoreManager;
         manager.setStorageTool({
-           getter:function(name){
-            return Promise.resolve(JSON.parse(localStorage.getItem(name)||'{}'));
-           },
-           setter:function(name,value){
-            return Promise.resolve(localStorage.setItem(name,JSON.stringify(value)));
-           }
-       });
-       var stores = [
-           {
-               name:'test',
-               model:{
-                   value:''
-               },
-               storage:true
-           },
-           {
-               name:'test1',
-               model:{
-                   value:'1112'
-               },
-               storage:true
-           },
-       ]
-       manager.load(stores).then(function(){
-            console.log('store test:'+manager.test.value)
-            console.log('store test1:'+manager.test1.value)
-            console.log('set'+Date.now())
-            manager.test.addListener('change',function(){
-                console.log(arguments)
-                console.log('change1'+Date.now())
-            });
-             manager.test.set('value', ''+Date.now());
-            manager.test1.set('value', '222'+Date.now());
-            
-       })
-      
-       
-       manager.addListener('change',function(){
-        console.log(arguments)
-         console.log('change'+Date.now())
-       });
+            getter: function (name) {
+                return Promise.resolve(JSON.parse(localStorage.getItem(name) || '{}'));
+            },
+            setter: function (name, value) {
+                return Promise.resolve(localStorage.setItem(name, JSON.stringify(value)));
+            }
+        });
+        var stores = [
+            {
+                name: 'user',
+                model: {
+                    name: 'unknow',
+                    age: 0,
+                    gender: 'unkown'
+                },
+                storage: true,
+                flow: ['userlist']
+            },
+            {
+                name: 'userlist',
+                model: {
+                    list: []
+                },
+                storage: true,
+                onflow: function (event) {
+                    if (event.target.getStoreName() === 'user') {
+                        var list = this.get('list');
+                        list.push(event.target.copy());
+                        this.set('list', list);
+                        
+                    }
+                }
+            },
+        ]
+        manager.load(stores).then(function () {
+            manager.user.addListener('change', updateUser);
+            manager.userlist.addListener('change', updateUserList);
+            updateUser();
+            updateUserList();
+        });
 
+        document.getElementById('add_user').addEventListener('click',addUser,false)
+        function addUser() {
+            var info = document.querySelectorAll('#user input[type=text]');
+            manager.user.assign({
+                name:info[0].value,
+                age:parseInt(info[1].value),
+                gender:info[2].value
+            })
+        }
+        function updateUser(){
+            document.getElementById('current_user').innerHTML= '<p>name:'+manager.user.get('name')+'</p>';
+        }
+        function updateUserList() {
+            var html = [];
+            manager.userlist.get('list').forEach(function(v){
+                html.push('<li>name:'+v['name']+'</li>')
+            });
+            document.getElementById('userlist').innerHTML = html.join('');
+        }
     </script>
 </body>
+
 </html>

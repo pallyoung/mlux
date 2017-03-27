@@ -9,9 +9,8 @@ import {
     promiseNoop,
     forEach,
 } from './../util';
-
+import Event from './../Event';
 import constants from './../constants';
-var Event = constants.EVNET;
 
 /**
  * @store config
@@ -66,7 +65,8 @@ function flowTo(flow, upstream, storeManager) {
     if (isArray(flow)) {
         flow.forEach(function (storeName) {
             let store = manager[storeName];
-            store.onFlow(upstream);
+            let event = new Event(Event.CHANGE,upstream);
+            store.onFlow(event);
         });
     }
 }
@@ -158,14 +158,12 @@ export default function StoreFactory(config, storeManager) {
         removeAllListeners() {
             return eventEmitter.removeAllListeners(...args);
         }
-        emit(type, ...args) {
-            return eventEmitter.emit(type, ...args);
-        }
         notifyChange() {
             clearTimeout(timeoutHandles.change);
             timeoutHandles.change = setTimeout(() => {
-                this.emit(Event.CHANGE);
-                manager.emit(Event.CHANGE, name);
+                var event = new Event(Event.CHANGE,this);
+                eventEmitter.emit(Event.CHANGE,event);
+                manager.emit(Event.CHANGE, event);
                 if (storage) {
                     manager.syncStorage(name, this.copy());
                 }
@@ -179,9 +177,9 @@ export default function StoreFactory(config, storeManager) {
             onwillunload();
         }
         //hook
-        onFlow(store) {
+        onFlow(event) {
             if (isFunction(onflow)) {
-                onFlow(store).call(this);
+                onflow.call(this,event);
             }
         }
         //从一个特定的地方获取值

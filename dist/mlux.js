@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -257,7 +257,11 @@ var _EventEmitter2 = _interopRequireDefault(_EventEmitter);
 
 var _util = __webpack_require__(0);
 
-var _constants = __webpack_require__(8);
+var _Event = __webpack_require__(7);
+
+var _Event2 = _interopRequireDefault(_Event);
+
+var _constants = __webpack_require__(9);
 
 var _constants2 = _interopRequireDefault(_constants);
 
@@ -266,8 +270,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Event = _constants2.default.EVNET;
 
 /**
  * @store config
@@ -294,34 +296,41 @@ var Event = _constants2.default.EVNET;
  * 
  * }
  */
-var _storeConfigContainer = {};
-function setStoreConfigByConfig(config, storeManager) {
-    var storeConfig = {
-        model: {},
-        flow: [],
-        onflow: function onflow() {},
-        pump: function pump() {},
-        onwillunload: function onwillunload() {},
-        onload: function onload() {},
-        storage: true | false,
-        manager: storeManager,
-        eventEmitter: new _EventEmitter2.default(),
-        timeoutHandles: {
-            change: undefined
-        }
-    };
-}
+// var _storeConfigContainer = {
+
+// }
+// function setStoreConfigByConfig(config,storeManager) {
+//     var storeConfig = {
+//         model: {},
+//         flow: [],
+//         onflow: function () {
+//         },
+//         pump: function () {
+//         },
+//         onwillunload: function () {
+//         },
+//         onload: function () {
+//         },
+//         storage: true | false,
+//         manager: storeManager,
+//         eventEmitter: new EventEmitter(),
+//         timeoutHandles: {
+//             change: undefined
+//         }
+//     }
+// }
 
 function flowTo(flow, upstream, storeManager) {
     if ((0, _util.isArray)(flow)) {
         flow.forEach(function (storeName) {
             var store = manager[storeName];
-            store.onFlow(upstream);
+            var event = new _Event2.default(_Event2.default.CHANGE, upstream);
+            store.onFlow(event);
         });
     }
 }
 function setValue(model, key, value) {
-    if (model[key] && model[key] !== value) {
+    if (model[key] && model[key] !== value && (0, _util.isSameType)(model[key], value)) {
         model[key] = value;
         return true;
     }
@@ -435,23 +444,15 @@ function StoreFactory(config, storeManager) {
                 return eventEmitter.removeAllListeners.apply(eventEmitter, _toConsumableArray(args));
             }
         }, {
-            key: 'emit',
-            value: function emit(type) {
-                for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-                    args[_key2 - 1] = arguments[_key2];
-                }
-
-                return eventEmitter.emit.apply(eventEmitter, [type].concat(args));
-            }
-        }, {
             key: 'notifyChange',
             value: function notifyChange() {
                 var _this2 = this;
 
                 clearTimeout(timeoutHandles.change);
                 timeoutHandles.change = setTimeout(function () {
-                    _this2.emit(Event.CHANGE);
-                    manager.emit(Event.CHANGE, name);
+                    var event = new _Event2.default(_Event2.default.CHANGE, _this2);
+                    eventEmitter.emit(_Event2.default.CHANGE, event);
+                    manager.emit(_Event2.default.CHANGE, event);
                     if (storage) {
                         manager.syncStorage(name, _this2.copy());
                     }
@@ -470,21 +471,11 @@ function StoreFactory(config, storeManager) {
 
         }, {
             key: 'onFlow',
-            value: function (_onFlow) {
-                function onFlow(_x) {
-                    return _onFlow.apply(this, arguments);
-                }
-
-                onFlow.toString = function () {
-                    return _onFlow.toString();
-                };
-
-                return onFlow;
-            }(function (store) {
+            value: function onFlow(event) {
                 if ((0, _util.isFunction)(onflow)) {
-                    onFlow(store).call(this);
+                    onflow.call(this, event);
                 }
-            })
+            }
             //从一个特定的地方获取值
 
         }, {
@@ -829,7 +820,7 @@ var _equlas = __webpack_require__(3);
 
 var _equlas2 = _interopRequireDefault(_equlas);
 
-var _Observer = __webpack_require__(7);
+var _Observer = __webpack_require__(8);
 
 var _Observer2 = _interopRequireDefault(_Observer);
 
@@ -976,7 +967,7 @@ var StoreManager = function () {
 function createStore(config, manager) {
     var store = (0, _Store2.default)(config, manager);
     manager[config.name] = store;
-    (0, _util.immutableProperty)(manager, config.name);
+    //immutableProperty(manager, config.name);
     return store;
 }
 var manager = new StoreManager();
@@ -1186,6 +1177,35 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Event = function Event(type, target) {
+    _classCallCheck(this, Event);
+
+    this.type = type;
+    this.target = target;
+    this.timeStamp = Date.now();
+};
+
+Object.assign(Event, {
+    CHANGE: 'change', //store change 
+    ONLOAD: 'onload', //store onload
+    STORAGE: 'storage', //store storage
+    STORAGE_ERROR: 'storagerrror' });
+
+exports.default = Event;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _equlas = __webpack_require__(3);
 
 var _equlas2 = _interopRequireDefault(_equlas);
@@ -1223,7 +1243,7 @@ function observerProp(object, prop, callback) {
 exports.default = observer;
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1234,16 +1254,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
     PACKAGE_NAME: 'mlux',
-    VERSION: '0.2.5',
-    EVNET: {
-        CHANGE: 'change', //store change 
-        REGISTER: 'register', //store register
-        STORAGE: 'storage', //store storage
-        STORAGE_ERROR: 'storagerrror' }
+    VERSION: '0.2.5'
 };
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
