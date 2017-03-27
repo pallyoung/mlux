@@ -11,7 +11,6 @@ import {
     promiseNoop,
     sealProperty,
     forEach,
-    immutableProperty,
 } from './../util';
 
 
@@ -124,7 +123,7 @@ class StoreManager {
 function createStore(config, manager) {
     var store = StoreFactory(config, manager);
     manager[config.name] = store;
-    immutableProperty(manager, config.name);
+    //immutableProperty(manager, config.name);
     return store;
 }
 var manager = new StoreManager();

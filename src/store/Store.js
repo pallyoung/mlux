@@ -7,10 +7,7 @@ import {
     isSameType,
     noop,
     promiseNoop,
-    defineProperty,
-    sealProperty,
     forEach,
-    freezeProperty
 } from './../util';
 
 import constants from './../constants';
@@ -41,29 +38,29 @@ var Event = constants.EVNET;
  * 
  * }
  */
-var _storeConfigContainer = {
+// var _storeConfigContainer = {
 
-}
-function setStoreConfigByConfig(config,storeManager) {
-    var storeConfig = {
-        model: {},
-        flow: [],
-        onflow: function () {
-        },
-        pump: function () {
-        },
-        onwillunload: function () {
-        },
-        onload: function () {
-        },
-        storage: true | false,
-        manager: storeManager,
-        eventEmitter: new EventEmitter(),
-        timeoutHandles: {
-            change: undefined
-        }
-    }
-}
+// }
+// function setStoreConfigByConfig(config,storeManager) {
+//     var storeConfig = {
+//         model: {},
+//         flow: [],
+//         onflow: function () {
+//         },
+//         pump: function () {
+//         },
+//         onwillunload: function () {
+//         },
+//         onload: function () {
+//         },
+//         storage: true | false,
+//         manager: storeManager,
+//         eventEmitter: new EventEmitter(),
+//         timeoutHandles: {
+//             change: undefined
+//         }
+//     }
+// }
 
 function flowTo(flow, upstream, storeManager) {
     if (isArray(flow)) {
@@ -74,7 +71,7 @@ function flowTo(flow, upstream, storeManager) {
     }
 }
 function setValue(model, key, value) {
-    if (model[key] && model[key] !== value) {
+    if (model[key] && model[key] !== value &&isSameType(model[key],value)) {
         model[key] = value;
         return true;
     }
