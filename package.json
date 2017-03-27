@@ -33,7 +33,7 @@
   ],
   "files":[
     "dist/",
-   " package.json",
+   "package.json",
    "README.md"
   ],
   "license": "ISC",
@@ -48,5 +48,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "0.2.5"
+  "version": "0.2.6"
 }
