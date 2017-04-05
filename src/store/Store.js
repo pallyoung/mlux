@@ -65,13 +65,13 @@ function flowTo(flow, upstream, storeManager) {
     if (isArray(flow)) {
         flow.forEach(function (storeName) {
             let store = manager[storeName];
-            let event = new Event(Event.CHANGE,upstream);
+            let event = new Event(Event.CHANGE, upstream);
             store.onFlow(event);
         });
     }
 }
 function setValue(model, key, value) {
-    if (model[key] && model[key] !== value &&isSameType(model[key],value)) {
+    if (model[key] !== undefined && model[key] !== value && isSameType(model[key], value)) {
         model[key] = value;
         return true;
     }
@@ -161,8 +161,8 @@ export default function StoreFactory(config, storeManager) {
         notifyChange() {
             clearTimeout(timeoutHandles.change);
             timeoutHandles.change = setTimeout(() => {
-                var event = new Event(Event.CHANGE,this);
-                eventEmitter.emit(Event.CHANGE,event);
+                var event = new Event(Event.CHANGE, this);
+                eventEmitter.emit(Event.CHANGE, event);
                 manager.emit(Event.CHANGE, event);
                 if (storage) {
                     manager.syncStorage(name, this.copy());
@@ -179,7 +179,7 @@ export default function StoreFactory(config, storeManager) {
         //hook
         onFlow(event) {
             if (isFunction(onflow)) {
-                onflow.call(this,event);
+                onflow.call(this, event);
             }
         }
         //从一个特定的地方获取值

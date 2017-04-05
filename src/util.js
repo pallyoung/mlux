@@ -16,6 +16,9 @@ function isUndefined(source) {
 function isObject(source) {
     return !Array.isArray(source) && source != null && typeof source == 'object';
 }
+function isPlainObject(source){
+    return typeof source === 'object' && (source.constructor === Object ||source.constructor === undefined);
+}
 function isArray(source) {
     return Array.isArray(source);
 }
@@ -141,5 +144,6 @@ export {
     freezeProperty,
     immutableProperty,
     preventExtensions,
-    forEach
+    forEach,
+    isPlainObject
 }
