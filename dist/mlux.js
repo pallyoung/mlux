@@ -86,7 +86,7 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.forEach = exports.preventExtensions = exports.immutableProperty = exports.freezeProperty = exports.sealProperty = exports.defineProperty = exports.promiseNoop = exports.noop = exports.isNative = exports.isUndefined = exports.isBoolean = exports.isNumber = exports.isString = exports.isNull = exports.isEmpty = exports.isSameType = exports.isFunction = exports.isArray = exports.isObject = exports.type = undefined;
+exports.isPlainObject = exports.forEach = exports.preventExtensions = exports.immutableProperty = exports.freezeProperty = exports.sealProperty = exports.defineProperty = exports.promiseNoop = exports.noop = exports.isNative = exports.isUndefined = exports.isBoolean = exports.isNumber = exports.isString = exports.isNull = exports.isEmpty = exports.isSameType = exports.isFunction = exports.isArray = exports.isObject = exports.type = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -111,6 +111,9 @@ function isUndefined(source) {
 }
 function isObject(source) {
     return !Array.isArray(source) && source != null && (typeof source === 'undefined' ? 'undefined' : _typeof(source)) == 'object';
+}
+function isPlainObject(source) {
+    return (typeof source === 'undefined' ? 'undefined' : _typeof(source)) === 'object' && (source.constructor === Object || source.constructor === undefined);
 }
 function isArray(source) {
     return Array.isArray(source);
@@ -235,6 +238,7 @@ exports.freezeProperty = freezeProperty;
 exports.immutableProperty = immutableProperty;
 exports.preventExtensions = preventExtensions;
 exports.forEach = forEach;
+exports.isPlainObject = isPlainObject;
 
 /***/ }),
 /* 1 */
@@ -323,14 +327,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function flowTo(flow, upstream, storeManager) {
     if ((0, _util.isArray)(flow)) {
         flow.forEach(function (storeName) {
-            var store = manager[storeName];
+            var store = storeManager[storeName];
             var event = new _Event2.default(_Event2.default.CHANGE, upstream);
             store.onFlow(event);
         });
     }
 }
 function setValue(model, key, value) {
-    if (model[key] && model[key] !== value && (0, _util.isSameType)(model[key], value)) {
+    if (model[key] !== undefined && model[key] !== value && (0, _util.isSameType)(model[key], value)) {
         model[key] = value;
         return true;
     }
