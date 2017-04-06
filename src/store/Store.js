@@ -64,7 +64,7 @@ import constants from './../constants';
 function flowTo(flow, upstream, storeManager) {
     if (isArray(flow)) {
         flow.forEach(function (storeName) {
-            let store = manager[storeName];
+            let store = storeManager[storeName];
             let event = new Event(Event.CHANGE, upstream);
             store.onFlow(event);
         });
