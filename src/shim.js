@@ -8,7 +8,7 @@ var hasDontEnumBug = !{
 var hasProtoEnumBug = function () { }.propertyIsEnumerable('prototype');
 var dontEnums = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'];
 var dontEnumsLength = dontEnums.length;
-
+var ohasOwn = Object.prototype.hasOwnProperty;
 if (!isNative(Object.keys)) {
     Object.keys = function (object) {
         if (object === null || object === undefined) {
