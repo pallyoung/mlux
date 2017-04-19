@@ -16,7 +16,7 @@ if (!isNative(Object.keys)) {
         }
         var theKeys = [];
         var skipProto = hasProtoEnumBug && typeof object === 'function';
-        if (typeof object === 'string' || object && object.callee) {
+        if (typeof object === 'string' || object && object.length) {
             for (var i = 0; i < object.length; ++i) {
                 theKeys.push(String(i));
             }

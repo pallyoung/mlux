@@ -1,6 +1,10 @@
 'use strict'
 import EventEmitter from './../EventEmitter';
-import {
+import util from './../util';
+import Event from './../Event';
+import constants from './../constants';
+
+var {
     isObject,
     isArray,
     isFunction,
@@ -8,9 +12,7 @@ import {
     noop,
     promiseNoop,
     forEach,
-} from './../util';
-import Event from './../Event';
-import constants from './../constants';
+}  = util;
 
 /**
  * @store config

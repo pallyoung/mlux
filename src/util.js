@@ -1,6 +1,16 @@
 'use strict'
-import TypeDetector from 'js-type-detector';
-var type = TypeDetector.is;
+var testFunctionName = /function\s+(\w+)\s*\(/;
+var OPToString = Object.prototype.toString;
+function type(object) {
+    var type = OPToString.call(object).slice(8, -1);
+    if (type !== 'Object') {
+        return type;
+    } else if (typeof object.constructor === 'function' && testFunctionName.test(object.constructor.toString())) {
+        type = RegExp.$1;
+        return type;
+    }
+    return type;
+}
 function isString(source) {
     return type(source) === 'string';
 }
@@ -16,8 +26,8 @@ function isUndefined(source) {
 function isObject(source) {
     return !Array.isArray(source) && source != null && typeof source == 'object';
 }
-function isPlainObject(source){
-    return typeof source === 'object' && (source.constructor === Object ||source.constructor === undefined);
+function isPlainObject(source) {
+    return typeof source === 'object' && (source.constructor === Object || source.constructor === undefined);
 }
 function isArray(source) {
     return Array.isArray(source);
@@ -124,7 +134,7 @@ function immutableProperty(object, property) {
 function preventExtensions(object) {
     return Object.preventExtensions(object);
 }
-export {
+module.exports = {
     type,
     isObject,
     isArray,

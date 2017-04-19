@@ -1,5 +1,5 @@
 'use strict'
-export default {
+module.exports = {
     PACKAGE_NAME:'mlux',
     VERSION:'0.2.5'
 }

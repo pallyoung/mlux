@@ -3,7 +3,9 @@ import EventEmitter from './../EventEmitter';
 import StoreFactory from './Store';
 import equlas from './../equlas';
 import observer from './../Observer';
-import {
+import util from './../util';
+
+var {
     isObject,
     isArray,
     isFunction,
@@ -11,9 +13,7 @@ import {
     promiseNoop,
     sealProperty,
     forEach,
-} from './../util';
-
-
+} = util;
 var storageTool = {
     setter: promiseNoop,
     getter: promiseNoop
@@ -129,4 +129,4 @@ function createStore(config, manager) {
 var manager = new StoreManager();
 
 
-export default manager;
+module.exports =  manager;

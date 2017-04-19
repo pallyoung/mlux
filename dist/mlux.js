@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -83,20 +83,20 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.isPlainObject = exports.forEach = exports.preventExtensions = exports.immutableProperty = exports.freezeProperty = exports.sealProperty = exports.defineProperty = exports.promiseNoop = exports.noop = exports.isNative = exports.isUndefined = exports.isBoolean = exports.isNumber = exports.isString = exports.isNull = exports.isEmpty = exports.isSameType = exports.isFunction = exports.isArray = exports.isObject = exports.type = undefined;
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _jsTypeDetector = __webpack_require__(6);
-
-var _jsTypeDetector2 = _interopRequireDefault(_jsTypeDetector);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var type = _jsTypeDetector2.default.is;
+var testFunctionName = /function\s+(\w+)\s*\(/;
+var OPToString = Object.prototype.toString;
+function type(object) {
+    var type = OPToString.call(object).slice(8, -1);
+    if (type !== 'Object') {
+        return type;
+    } else if (typeof object.constructor === 'function' && testFunctionName.test(object.constructor.toString())) {
+        type = RegExp.$1;
+        return type;
+    }
+    return type;
+}
 function isString(source) {
     return type(source) === 'string';
 }
@@ -218,27 +218,29 @@ function immutableProperty(object, property) {
 function preventExtensions(object) {
     return Object.preventExtensions(object);
 }
-exports.type = type;
-exports.isObject = isObject;
-exports.isArray = isArray;
-exports.isFunction = isFunction;
-exports.isSameType = isSameType;
-exports.isEmpty = isEmpty;
-exports.isNull = isNull;
-exports.isString = isString;
-exports.isNumber = isNumber;
-exports.isBoolean = isBoolean;
-exports.isUndefined = isUndefined;
-exports.isNative = isNative;
-exports.noop = noop;
-exports.promiseNoop = promiseNoop;
-exports.defineProperty = defineProperty;
-exports.sealProperty = sealProperty;
-exports.freezeProperty = freezeProperty;
-exports.immutableProperty = immutableProperty;
-exports.preventExtensions = preventExtensions;
-exports.forEach = forEach;
-exports.isPlainObject = isPlainObject;
+module.exports = {
+    type: type,
+    isObject: isObject,
+    isArray: isArray,
+    isFunction: isFunction,
+    isSameType: isSameType,
+    isEmpty: isEmpty,
+    isNull: isNull,
+    isString: isString,
+    isNumber: isNumber,
+    isBoolean: isBoolean,
+    isUndefined: isUndefined,
+    isNative: isNative,
+    noop: noop,
+    promiseNoop: promiseNoop,
+    defineProperty: defineProperty,
+    sealProperty: sealProperty,
+    freezeProperty: freezeProperty,
+    immutableProperty: immutableProperty,
+    preventExtensions: preventExtensions,
+    forEach: forEach,
+    isPlainObject: isPlainObject
+};
 
 /***/ }),
 /* 1 */
@@ -261,11 +263,13 @@ var _EventEmitter2 = _interopRequireDefault(_EventEmitter);
 
 var _util = __webpack_require__(0);
 
-var _Event = __webpack_require__(7);
+var _util2 = _interopRequireDefault(_util);
+
+var _Event = __webpack_require__(6);
 
 var _Event2 = _interopRequireDefault(_Event);
 
-var _constants = __webpack_require__(9);
+var _constants = __webpack_require__(8);
 
 var _constants2 = _interopRequireDefault(_constants);
 
@@ -274,6 +278,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var isObject = _util2.default.isObject,
+    isArray = _util2.default.isArray,
+    isFunction = _util2.default.isFunction,
+    isSameType = _util2.default.isSameType,
+    noop = _util2.default.noop,
+    promiseNoop = _util2.default.promiseNoop,
+    _forEach = _util2.default.forEach;
 
 /**
  * @store config
@@ -325,7 +337,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // }
 
 function flowTo(flow, upstream, storeManager) {
-    if ((0, _util.isArray)(flow)) {
+    if (isArray(flow)) {
         flow.forEach(function (storeName) {
             var store = storeManager[storeName];
             var event = new _Event2.default(_Event2.default.CHANGE, upstream);
@@ -334,30 +346,30 @@ function flowTo(flow, upstream, storeManager) {
     }
 }
 function setValue(model, key, value) {
-    if (model[key] !== undefined && model[key] !== value && (0, _util.isSameType)(model[key], value)) {
+    if (model[key] !== undefined && model[key] !== value && isSameType(model[key], value)) {
         model[key] = value;
         return true;
     }
     return false;
 }
 function extend(dst, source) {
-    if ((0, _util.isObject)(source)) {
-        (0, _util.forEach)(source, function (v, key) {
+    if (isObject(source)) {
+        _forEach(source, function (v, key) {
             setValue(dst, key, v);
         });
     }
     return dst;
 }
 function StoreFactory(config, storeManager) {
-    if (!(0, _util.isObject)(config.model)) {
+    if (!isObject(config.model)) {
         throw new Error('initialize ' + config.name + ' error, model can noly be an object');
     }
     var name = config.name;
     var flow = config.flow || [];
-    var onflow = config.onflow || _util.noop;
+    var onflow = config.onflow || noop;
     var _pump = config.pump;
-    var onwillunload = config.onwillunload || _util.noop;
-    var onload = config.onload || _util.noop;
+    var onwillunload = config.onwillunload || noop;
+    var onload = config.onload || noop;
     var storage = config.storage || false;
     var manager = storeManager;
     var eventEmitter = new _EventEmitter2.default();
@@ -381,9 +393,9 @@ function StoreFactory(config, storeManager) {
             key: 'get',
             value: function get(key) {
                 var result = model[key];
-                if ((0, _util.isArray)(result)) {
+                if (isArray(result)) {
                     return result.slice();
-                } else if ((0, _util.isObject)(result)) {
+                } else if (isObject(result)) {
                     return Object.assign({}, result);
                 }
                 return result;
@@ -416,7 +428,7 @@ function StoreFactory(config, storeManager) {
             key: 'copy',
             value: function copy() {
                 var dst = {};
-                (0, _util.forEach)(model, function (v, key) {
+                _forEach(model, function (v, key) {
                     dst[key] = v;
                 });
                 return dst;
@@ -428,7 +440,7 @@ function StoreFactory(config, storeManager) {
             value: function forEach(callback) {
                 var _this = this;
 
-                (0, _util.forEach)(model, function (v, key) {
+                _forEach(model, function (v, key) {
                     callback(v, key, _this);
                 });
             }
@@ -476,7 +488,7 @@ function StoreFactory(config, storeManager) {
         }, {
             key: 'onFlow',
             value: function onFlow(event) {
-                if ((0, _util.isFunction)(onflow)) {
+                if (isFunction(onflow)) {
                     onflow.call(this, event);
                 }
             }
@@ -487,13 +499,13 @@ function StoreFactory(config, storeManager) {
             value: function pump() {
                 var _this3 = this;
 
-                if ((0, _util.isFunction)(_pump)) {
+                if (isFunction(_pump)) {
                     return _pump.apply(undefined, arguments).then(function (data) {
                         _this3.assign(data);
                         return _this3;
                     });
                 } else {
-                    return (0, _util.promiseNoop)();
+                    return promiseNoop();
                 }
             }
         }]);
@@ -739,7 +751,7 @@ if (!(0, _util.isNative)(Object.keys)) {
         }
         var theKeys = [];
         var skipProto = hasProtoEnumBug && typeof object === 'function';
-        if (typeof object === 'string' || object && object.callee) {
+        if (typeof object === 'string' || object && object.length) {
             for (var i = 0; i < object.length; ++i) {
                 theKeys.push(String(i));
             }
@@ -806,10 +818,6 @@ if (!(0, _util.isNative)(Object.assign)) {
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _EventEmitter = __webpack_require__(2);
@@ -824,19 +832,29 @@ var _equlas = __webpack_require__(3);
 
 var _equlas2 = _interopRequireDefault(_equlas);
 
-var _Observer = __webpack_require__(8);
+var _Observer = __webpack_require__(7);
 
 var _Observer2 = _interopRequireDefault(_Observer);
 
 var _util = __webpack_require__(0);
 
+var _util2 = _interopRequireDefault(_util);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var isObject = _util2.default.isObject,
+    isArray = _util2.default.isArray,
+    isFunction = _util2.default.isFunction,
+    isSameType = _util2.default.isSameType,
+    promiseNoop = _util2.default.promiseNoop,
+    sealProperty = _util2.default.sealProperty,
+    forEach = _util2.default.forEach;
+
 var storageTool = {
-    setter: _util.promiseNoop,
-    getter: _util.promiseNoop
+    setter: promiseNoop,
+    getter: promiseNoop
 };
 var eventEmitter = new _EventEmitter2.default();
 
@@ -879,7 +897,7 @@ var StoreManager = function () {
 
             if (config.storage) {
                 return this.syncStorage(config.name).then(function (cache) {
-                    if ((0, _util.isObject)(cache)) {
+                    if (isObject(cache)) {
                         for (var o in config.model) {
                             if (cache[o]) config.model[o] = cache[o];
                         }
@@ -903,7 +921,7 @@ var StoreManager = function () {
         value: function load(configs) {
             var _this2 = this;
 
-            if ((0, _util.isArray)(configs)) {
+            if (isArray(configs)) {
                 var config = configs.pop();
                 if (config) {
                     return this.store(config).then(function () {
@@ -976,218 +994,10 @@ function createStore(config, manager) {
 }
 var manager = new StoreManager();
 
-exports.default = manager;
+module.exports = manager;
 
 /***/ }),
 /* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-(function (factory) {
-    ( false ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory() :  true ? !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
-				__WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : window.TypeDetector = factory();
-})(function factory() {
-    'use strict';
-
-    var OPToString = Object.prototype.toString;
-    var hasDontEnumBug = !{
-        'toString': null
-    }.propertyIsEnumerable('toString');
-    var hasProtoEnumBug = function () {}.propertyIsEnumerable('prototype');
-    var dontEnums = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'];
-    var dontEnumsLength = dontEnums.length;
-    var ohasOwn = Object.prototype.hasOwnProperty;
-
-    var keys = Object.keys || function (object) {
-        var theKeys = [];
-        var skipProto = hasProtoEnumBug && typeof object === 'function';
-        if (typeof object === 'string' || object && object.callee) {
-            for (var i = 0; i < object.length; ++i) {
-                theKeys.push(String(i));
-            }
-        } else {
-            for (var name in object) {
-                if (!(skipProto && name === 'prototype') && ohasOwn.call(object, name)) {
-                    theKeys.push(String(name));
-                }
-            }
-        }
-
-        if (hasDontEnumBug) {
-            var ctor = object.constructor,
-                skipConstructor = ctor && ctor.prototype === object;
-            for (var j = 0; j < dontEnumsLength; j++) {
-                var dontEnum = dontEnums[j];
-                if (!(skipConstructor && dontEnum === 'constructor') && ohasOwn.call(object, dontEnum)) {
-                    theKeys.push(dontEnum);
-                }
-            }
-        }
-        return theKeys;
-    };
-    var testFunctionName = /function\s+(\w+)\s*\(/;
-
-    function is(object) {
-        var type = OPToString.call(object).slice(8, -1);
-        if (type !== 'Object') {
-            return type;
-        } else if (typeof object.constructor === 'function' && testFunctionName.test(object.constructor.toString())) {
-            type = RegExp.$1;
-            return type;
-        }
-        return type;
-    }
-    var isArray = Array.isArray || function (value) {
-        return OPToString.call(value) === '[object Array]';
-    };
-    function isEmptyArray(value) {
-        return isArray(value) && value.length <= 0;
-    }
-
-    function isNative(fn) {
-        return (/\[native code\]/.test(fn)
-        );
-    }
-
-    function isUndefined(value) {
-        return value === void 0;
-    }
-
-    function isNull(value) {
-        return value === null;
-    }
-    function isNumber(value) {
-        return typeof value === 'number';
-    }
-    function isZero(value) {
-        return 0 === value;
-    }
-    function isNegative(value) {
-        return isNumber(value) && value >>> 0 !== value;
-    }
-    function isBoolean(value) {
-        return typeof value === 'boolean';
-    }
-    /**
-     * @description 是否对象
-     * 
-     * @param {any} value 
-     * @returns 
-     */
-    function isObject(value) {
-        return (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object';
-    }
-    /**
-     * @description 是否简单的对象 直接是Object的实例
-     * 
-     * @param {any} value 
-     * @returns 
-     */
-    function isPlainObject(value) {
-        return typeof value === '[object Object]' && !value.constructor || value.constructor == Object;
-    }
-    /**
-     * @description 对象实例中是否含有可枚举的值（例如{}）
-     * 
-     * @param {any} value 
-     * @returns 
-     */
-    function hasEnumerableProperty(value) {
-        return is(value) === 'Object' && keys(value).length > 0;
-    }
-    /**
-     * @description 是否字符串
-     * 
-     * @param {any} value 
-     * @returns {boolean}
-     */
-    function isString(value) {
-        return typeof value === 'string';
-    }
-    var testEmptyString = /^[\s\uFEFF\xA0]*&/;
-    /**
-     * @description 是否空字符串 '' ' '都被认为是空字符串
-     * 
-     * @param {any} value 
-     * @returns {boolean}
-     */
-    function isEmptyString(value) {
-        return isString(value) && testEmptyString.test(value);
-    }
-    /**
-     * @description 是否function类型
-     * 
-     * @param {any} value 
-     * @returns {boolean}
-     */
-    function isFunction(value) {
-        return OPToString.call(value) === '[object Function]';
-    }
-
-    /**
-     * @description 返回是否空值 空数组 对象中是否含有可枚举的值（例如{}） 空字符都认为是空对象
-     * 
-     * @param {any} value 
-     * @returns {boolean}
-     */
-    function isEmptyValue(value) {
-        return isNull(value) || isUndefined(value) || isEmptyString(value) || isEmptyArray(value) || !hasEnumerableProperty(value);
-    }
-
-    function isStrictFalse(value) {
-        return value === false;
-    }
-    function isFalse(value) {
-        return !!value;
-    }
-    function isRegExp(value) {
-        return OPToString(val) == '[object RegExp]';
-    }
-    /**
-     * @description 返回空对象 null undefined ''
-     * 
-     * @param {any} value 
-     * @returns 
-     */
-    function isEmpty(value) {
-        return isNull(value) || isUndefined(value) || isEmptyString(value);
-    }
-
-    var TypeDetector = {
-        is: is,
-        isArray: isArray,
-        isBoolean: isBoolean,
-        isFunction: isFunction,
-        isNative: isNative,
-        isObject: isObject,
-        isPlainObject: isPlainObject,
-        isNull: isNull,
-        isNumber: isNumber,
-        isZero: isZero,
-        isNegative: isNegative,
-        isString: isString,
-        isUndefined: isUndefined,
-        isEmptyString: isEmptyString,
-        isEmptyArray: isEmptyArray,
-        isEmptyValue: isEmptyValue,
-        isEmpty: isEmpty,
-        isNaN: isNaN,
-        isStrictFalse: isStrictFalse,
-        isFalse: isFalse,
-        isRegExp: isRegExp
-    };
-    return TypeDetector;
-});
-
-/***/ }),
-/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1216,7 +1026,7 @@ Object.assign(Event, {
 exports.default = Event;
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1263,31 +1073,23 @@ function observerProp(object, prop, callback) {
 exports.default = observer;
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = {
+module.exports = {
     PACKAGE_NAME: 'mlux',
     VERSION: '0.2.5'
 };
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.createStore = exports.StoreManager = exports.default = undefined;
 
 var _StoreManager = __webpack_require__(5);
 
@@ -1303,7 +1105,7 @@ var _shim2 = _interopRequireDefault(_shim);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _module = {
+var modules = {
     StoreManager: _StoreManager2.default,
     createStore: createStore
 };
@@ -1312,9 +1114,7 @@ function createStore(config) {
     config.storage = false;
     return (0, _Store2.default)(config, _StoreManager2.default);
 }
-exports.default = _module;
-exports.StoreManager = _StoreManager2.default;
-exports.createStore = createStore;
+module.exports = modules;
 
 /***/ })
 /******/ ]);
