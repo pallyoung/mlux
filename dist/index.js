@@ -1,5 +1,9 @@
 'use strict';
 
+var _shim = require('./shim.js');
+
+var _shim2 = _interopRequireDefault(_shim);
+
 var _StoreManager = require('./store/StoreManager');
 
 var _StoreManager2 = _interopRequireDefault(_StoreManager);
@@ -7,10 +11,6 @@ var _StoreManager2 = _interopRequireDefault(_StoreManager);
 var _Store = require('./store/Store');
 
 var _Store2 = _interopRequireDefault(_Store);
-
-var _shim = require('./shim.js');
-
-var _shim2 = _interopRequireDefault(_shim);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 

@@ -1091,6 +1091,10 @@ module.exports = {
 "use strict";
 
 
+var _shim = __webpack_require__(4);
+
+var _shim2 = _interopRequireDefault(_shim);
+
 var _StoreManager = __webpack_require__(5);
 
 var _StoreManager2 = _interopRequireDefault(_StoreManager);
@@ -1098,10 +1102,6 @@ var _StoreManager2 = _interopRequireDefault(_StoreManager);
 var _Store = __webpack_require__(1);
 
 var _Store2 = _interopRequireDefault(_Store);
-
-var _shim = __webpack_require__(4);
-
-var _shim2 = _interopRequireDefault(_shim);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
