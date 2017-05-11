@@ -1,7 +1,7 @@
 'use strict'
+import shim from './shim.js';
 import StoreManager from './store/StoreManager';
 import storeFactory from './store/Store';
-import shim from './shim.js';
 
 var modules= {
     StoreManager,
