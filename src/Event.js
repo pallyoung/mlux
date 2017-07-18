@@ -8,11 +8,9 @@ class Event {
 }
 
 
-Object.assign(Event, {
-    CHANGE: 'change',//store change 
-    ONLOAD: 'onload',//store onload
-    STORAGE: 'storage',//store storage
-    STORAGE_ERROR: 'storagerrror',//storage error
-});
+Event.CHANGE = 'change';
+Event.ONLOAD = 'onload';
+Event.STORAGE = 'storage';
+Event.STORAGE_ERROR = 'storagerrror';
 
 export default Event;

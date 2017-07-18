@@ -1017,11 +1017,10 @@ var Event = function Event(type, target) {
     this.timeStamp = Date.now();
 };
 
-Object.assign(Event, {
-    CHANGE: 'change', //store change 
-    ONLOAD: 'onload', //store onload
-    STORAGE: 'storage', //store storage
-    STORAGE_ERROR: 'storagerrror' });
+Event.CHANGE = 'change';
+Event.ONLOAD = 'onload';
+Event.STORAGE = 'storage';
+Event.STORAGE_ERROR = 'storagerrror';
 
 exports.default = Event;
 
